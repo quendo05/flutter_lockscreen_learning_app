@@ -1,0 +1,21 @@
+import '../../domain/models/vocab.dart';
+
+/// The source of truth for vocabulary entries.
+///
+/// Every method is asynchronous because the real implementation talks to a
+/// database. Keeping the contract async from the start means swapping the
+/// in-memory implementation for a persistent one does not ripple through the
+/// view models.
+abstract class VocabRepository {
+  /// All stored entries, newest first.
+  Future<List<Vocab>> getAll();
+
+  /// The entry with [id], or null if nothing is stored under that id.
+  Future<Vocab?> getById(String id);
+
+  /// Inserts [vocab], replacing any entry that already carries the same id.
+  Future<void> save(Vocab vocab);
+
+  /// Removes the entry with [id]. Unknown ids are ignored.
+  Future<void> delete(String id);
+}
