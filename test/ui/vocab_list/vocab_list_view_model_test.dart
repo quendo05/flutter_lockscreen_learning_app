@@ -1,23 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/vocab_list/view_models/vocab_list_view_model.dart';
-
-/// A repository whose every call fails, for exercising the error path.
-class _FailingVocabRepository implements VocabRepository {
-  @override
-  Future<List<Vocab>> getAll() async => throw Exception('database unavailable');
-
-  @override
-  Future<Vocab?> getById(String id) async => throw Exception('database unavailable');
-
-  @override
-  Future<void> save(Vocab vocab) async => throw Exception('database unavailable');
-
-  @override
-  Future<void> delete(String id) async => throw Exception('database unavailable');
-}
+import '../../support/vocab_repository_doubles.dart';
 
 void main() {
   final fixedNow = DateTime.utc(2026, 6, 1, 12);
@@ -25,6 +10,7 @@ void main() {
   VocabListViewModel buildViewModel(VocabRepository repository) {
     var counter = 0;
     return VocabListViewModel(
+      deckId: 'd1',
       repository: repository,
       clock: () => fixedNow,
       idGenerator: () => 'id-${++counter}',
@@ -62,7 +48,7 @@ void main() {
     });
 
     test('surfaces a readable message when the repository fails', () async {
-      final viewModel = buildViewModel(_FailingVocabRepository());
+      final viewModel = buildViewModel(FailingVocabRepository());
 
       await viewModel.load();
 
@@ -71,7 +57,7 @@ void main() {
     });
 
     test('clears a previous error after a successful reload', () async {
-      final viewModel = buildViewModel(_FailingVocabRepository());
+      final viewModel = buildViewModel(FailingVocabRepository());
       await viewModel.load();
 
       final recovered = buildViewModel(InMemoryVocabRepository());
@@ -88,6 +74,22 @@ void main() {
       await viewModel.load();
 
       expect(notifications, greaterThan(0));
+    });
+  });
+
+  group('deck scoping', () {
+    test('shows only the terms belonging to this deck', () async {
+      final repository = InMemoryVocabRepository();
+      final other = VocabListViewModel(
+        deckId: 'other-deck',
+        repository: repository,
+      );
+      await other.addVocab(term: 'le livre', translation: 'das Buch');
+
+      final viewModel = buildViewModel(repository);
+      await viewModel.addVocab(term: 'el libro', translation: 'das Buch');
+
+      expect(viewModel.vocabs.single.term, 'el libro');
     });
   });
 

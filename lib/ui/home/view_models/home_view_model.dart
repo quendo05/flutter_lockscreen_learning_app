@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../data/repositories/deck_repository.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../../data/repositories/vocab_repository.dart';
 import '../../../domain/models/scheduled_vocab.dart';
@@ -13,12 +14,14 @@ typedef Clock = DateTime Function();
 class HomeViewModel extends ChangeNotifier {
   HomeViewModel({
     required this._vocabRepository,
+    required this._deckRepository,
     required this._settingsRepository,
     this._buildSchedule = const BuildVocabScheduleUseCase(),
     Clock? clock,
   }) : _clock = clock ?? DateTime.now;
 
   final VocabRepository _vocabRepository;
+  final DeckRepository _deckRepository;
   final SettingsRepository _settingsRepository;
   final BuildVocabScheduleUseCase _buildSchedule;
   final Clock _clock;
@@ -28,6 +31,7 @@ class HomeViewModel extends ChangeNotifier {
   int _vocabularyCount = 0;
   List<ScheduledVocab> _upcoming = const [];
   Duration _displayInterval = Duration.zero;
+  String? _activeDeckName;
 
   /// True while the repositories are being read.
   bool get isLoading => _isLoading;
@@ -48,6 +52,9 @@ class HomeViewModel extends ChangeNotifier {
   /// The configured gap between two lock screen terms.
   Duration get displayInterval => _displayInterval;
 
+  /// The name of the deck currently feeding the lock screen.
+  String? get activeDeckName => _activeDeckName;
+
   /// True only when loading succeeded and the user has saved nothing yet.
   /// A failed read is not an empty collection, so it must not claim to be one.
   bool get hasNoVocabulary =>
@@ -59,7 +66,10 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final vocabs = await _vocabRepository.getAll();
+      // Only the active deck reaches the lock screen, so only it belongs here.
+      final activeDeckId = await _settingsRepository.getActiveDeckId();
+      final vocabs = await _vocabRepository.getByDeck(activeDeckId);
+      _activeDeckName = (await _deckRepository.getById(activeDeckId))?.name;
       _displayInterval = await _settingsRepository.getDisplayInterval();
       _vocabularyCount = vocabs.length;
 

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
@@ -7,29 +5,7 @@ import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart'
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/vocab_list/view_models/vocab_list_view_model.dart';
 import 'package:lockscreen_learning_app/ui/vocab_list/widgets/vocab_list_screen.dart';
-
-class _FailingVocabRepository implements VocabRepository {
-  @override
-  Future<List<Vocab>> getAll() async => throw Exception('offline');
-  @override
-  Future<Vocab?> getById(String id) async => throw Exception('offline');
-  @override
-  Future<void> save(Vocab vocab) async => throw Exception('offline');
-  @override
-  Future<void> delete(String id) async => throw Exception('offline');
-}
-
-/// Never completes, so the screen stays in its loading state.
-class _HangingVocabRepository implements VocabRepository {
-  @override
-  Future<List<Vocab>> getAll() => Completer<List<Vocab>>().future;
-  @override
-  Future<Vocab?> getById(String id) async => null;
-  @override
-  Future<void> save(Vocab vocab) async {}
-  @override
-  Future<void> delete(String id) async {}
-}
+import '../../support/vocab_repository_doubles.dart';
 
 void main() {
   Future<void> pumpScreen(WidgetTester tester, VocabRepository repository) {
@@ -37,7 +13,9 @@ void main() {
     return tester.pumpWidget(
       MaterialApp(
         home: VocabListScreen(
+          title: 'Spanish basics',
           viewModel: VocabListViewModel(
+            deckId: 'd1',
             repository: repository,
             idGenerator: () => 'id-${++counter}',
           ),
@@ -48,6 +26,7 @@ void main() {
 
   Vocab vocab(String id, String term, String translation) => Vocab(
         id: id,
+        deckId: 'd1',
         term: term,
         translation: translation,
         sourceLanguage: 'es',
@@ -57,7 +36,7 @@ void main() {
 
   testWidgets('shows a progress indicator while entries are loading',
       (tester) async {
-    await pumpScreen(tester, _HangingVocabRepository());
+    await pumpScreen(tester, HangingVocabRepository());
     await tester.pump();
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -85,7 +64,7 @@ void main() {
   });
 
   testWidgets('offers a retry when the repository fails', (tester) async {
-    await pumpScreen(tester, _FailingVocabRepository());
+    await pumpScreen(tester, FailingVocabRepository());
     await tester.pumpAndSettle();
 
     expect(find.text('Try again'), findsOneWidget);

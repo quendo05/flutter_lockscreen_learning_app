@@ -15,11 +15,15 @@ typedef IdGenerator = String Function();
 /// itself stays free of data-fetching logic.
 class VocabListViewModel extends ChangeNotifier {
   VocabListViewModel({
+    required this.deckId,
     required this._repository,
     Clock? clock,
     IdGenerator? idGenerator,
   })  : _clock = clock ?? DateTime.now,
         _idGenerator = idGenerator ?? _defaultIdGenerator;
+
+  /// The deck new terms are added to.
+  final String deckId;
 
   final VocabRepository _repository;
   final Clock _clock;
@@ -84,6 +88,7 @@ class VocabListViewModel extends ChangeNotifier {
 
     final vocab = Vocab(
       id: _idGenerator(),
+      deckId: deckId,
       term: trimmedTerm,
       translation: trimmedTranslation,
       sourceLanguage: sourceLanguage,
@@ -113,7 +118,7 @@ class VocabListViewModel extends ChangeNotifier {
 
   Future<void> _refresh() async {
     try {
-      _vocabs = await _repository.getAll();
+      _vocabs = await _repository.getByDeck(deckId);
       _loadError = null;
     } on Object catch (error) {
       _reportFailure(error);

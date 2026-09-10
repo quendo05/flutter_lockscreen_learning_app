@@ -1,22 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
+import 'package:lockscreen_learning_app/domain/models/deck.dart';
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/home/view_models/home_view_model.dart';
 import 'package:lockscreen_learning_app/ui/home/widgets/home_screen.dart';
-
-class _FailingVocabRepository implements VocabRepository {
-  @override
-  Future<List<Vocab>> getAll() async => throw Exception('offline');
-  @override
-  Future<Vocab?> getById(String id) async => throw Exception('offline');
-  @override
-  Future<void> save(Vocab vocab) async => throw Exception('offline');
-  @override
-  Future<void> delete(String id) async => throw Exception('offline');
-}
+import '../../support/vocab_repository_doubles.dart';
 
 void main() {
   var browseTaps = 0;
@@ -25,6 +17,7 @@ void main() {
 
   Vocab vocab(String id, String term, String translation) => Vocab(
         id: id,
+        deckId: 'd1',
         term: term,
         translation: translation,
         sourceLanguage: 'es',
@@ -38,7 +31,18 @@ void main() {
         home: HomeScreen(
           viewModel: HomeViewModel(
             vocabRepository: repository,
-            settingsRepository: InMemorySettingsRepository(),
+            deckRepository: InMemoryDeckRepository(
+              initialDecks: [
+                Deck(
+                  id: 'd1',
+                  name: 'Spanish basics',
+                  createdAt: DateTime.utc(2026, 1, 1),
+                ),
+              ],
+            ),
+            settingsRepository: InMemorySettingsRepository(
+              initialActiveDeckId: 'd1',
+            ),
             clock: () => DateTime(2026, 7, 1, 9),
           ),
           onBrowseVocabulary: () => browseTaps++,
@@ -117,7 +121,7 @@ void main() {
   });
 
   testWidgets('offers a retry when the store cannot be read', (tester) async {
-    await pumpHome(tester, _FailingVocabRepository());
+    await pumpHome(tester, FailingVocabRepository());
     await tester.pumpAndSettle();
 
     expect(find.text('Try again'), findsOneWidget);

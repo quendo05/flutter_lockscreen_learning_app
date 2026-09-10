@@ -90,6 +90,7 @@ class _HomeBody extends StatelessWidget {
         NextUpCard(scheduled: nextUp, followingAt: viewModel.followingAt),
         const SizedBox(height: 24),
         _CollectionSummary(
+          deckName: viewModel.activeDeckName,
           count: viewModel.vocabularyCount,
           interval: viewModel.displayInterval,
           onBrowse: onBrowseVocabulary,
@@ -101,11 +102,13 @@ class _HomeBody extends StatelessWidget {
 
 class _CollectionSummary extends StatelessWidget {
   const _CollectionSummary({
+    required this.deckName,
     required this.count,
     required this.interval,
     required this.onBrowse,
   });
 
+  final String? deckName;
   final int count;
   final Duration interval;
   final VoidCallback onBrowse;
@@ -118,7 +121,7 @@ class _CollectionSummary extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Your collection', style: theme.textTheme.titleMedium),
+        Text(deckName ?? 'Your collection', style: theme.textTheme.titleMedium),
         const SizedBox(height: 8),
         Text(
           '$count ${count == 1 ? 'term' : 'terms'} saved',
@@ -133,7 +136,7 @@ class _CollectionSummary extends StatelessWidget {
         const SizedBox(height: 12),
         OutlinedButton(
           onPressed: onBrowse,
-          child: const Text('Manage vocabulary'),
+          child: const Text('Manage decks'),
         ),
       ],
     );

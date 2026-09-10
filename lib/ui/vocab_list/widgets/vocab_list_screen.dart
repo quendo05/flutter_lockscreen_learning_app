@@ -7,7 +7,14 @@ import 'vocab_list_tile.dart';
 
 /// Lists the user's saved vocabulary and lets them add or remove entries.
 class VocabListScreen extends StatefulWidget {
-  const VocabListScreen({required this.viewModel, super.key});
+  const VocabListScreen({
+    required this.title,
+    required this.viewModel,
+    super.key,
+  });
+
+  /// Shown in the app bar — the name of the deck being browsed.
+  final String title;
 
   final VocabListViewModel viewModel;
 
@@ -53,7 +60,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Vocabulary')),
+      appBar: AppBar(title: Text(widget.title)),
       body: ListenableBuilder(
         listenable: widget.viewModel,
         builder: (context, _) => _VocabListBody(viewModel: widget.viewModel),

@@ -1,26 +1,19 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
+import 'package:lockscreen_learning_app/domain/models/deck.dart';
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/home/view_models/home_view_model.dart';
-
-class _FailingVocabRepository implements VocabRepository {
-  @override
-  Future<List<Vocab>> getAll() async => throw Exception('offline');
-  @override
-  Future<Vocab?> getById(String id) async => throw Exception('offline');
-  @override
-  Future<void> save(Vocab vocab) async => throw Exception('offline');
-  @override
-  Future<void> delete(String id) async => throw Exception('offline');
-}
+import '../../support/vocab_repository_doubles.dart';
 
 void main() {
   final now = DateTime.utc(2026, 7, 1, 9);
 
   Vocab vocab(String id, {DateTime? lastShownAt, int timesShown = 0}) => Vocab(
         id: id,
+        deckId: 'd1',
         term: 'term-$id',
         translation: 'translation-$id',
         sourceLanguage: 'es',
@@ -36,7 +29,15 @@ void main() {
   }) =>
       HomeViewModel(
         vocabRepository: vocabRepository ?? InMemoryVocabRepository(),
-        settingsRepository: InMemorySettingsRepository(initialInterval: interval),
+        deckRepository: InMemoryDeckRepository(
+          initialDecks: [
+            Deck(id: 'd1', name: 'Spanish basics', createdAt: now),
+          ],
+        ),
+        settingsRepository: InMemorySettingsRepository(
+          initialInterval: interval,
+          initialActiveDeckId: 'd1',
+        ),
         clock: () => now,
       );
 
@@ -125,7 +126,7 @@ void main() {
   group('when the store cannot be read', () {
     test('surfaces a message instead of a term', () async {
       final viewModel = buildViewModel(
-        vocabRepository: _FailingVocabRepository(),
+        vocabRepository: FailingVocabRepository(),
       );
 
       await viewModel.load();
@@ -137,12 +138,39 @@ void main() {
 
     test('does not claim the collection is empty', () async {
       final viewModel = buildViewModel(
-        vocabRepository: _FailingVocabRepository(),
+        vocabRepository: FailingVocabRepository(),
       );
 
       await viewModel.load();
 
       expect(viewModel.hasNoVocabulary, isFalse);
+    });
+  });
+
+  group('the active deck', () {
+    test('is named, so the summary can say which collection it describes',
+        () async {
+      final viewModel = buildViewModel();
+
+      await viewModel.load();
+
+      expect(viewModel.activeDeckName, 'Spanish basics');
+    });
+
+    test('is the only deck whose terms reach the lock screen', () async {
+      final viewModel = buildViewModel(
+        vocabRepository: InMemoryVocabRepository(
+          initialEntries: [
+            vocab('mine'),
+            vocab('theirs').copyWith(deckId: 'another-deck'),
+          ],
+        ),
+      );
+
+      await viewModel.load();
+
+      expect(viewModel.vocabularyCount, 1);
+      expect(viewModel.nextUp?.vocab.id, 'mine');
     });
   });
 
