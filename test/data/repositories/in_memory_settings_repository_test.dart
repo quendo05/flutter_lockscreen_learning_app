@@ -1,61 +1,41 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
+import 'package:lockscreen_learning_app/domain/models/deck.dart';
 
 void main() {
   late InMemorySettingsRepository repository;
 
   setUp(() => repository = InMemorySettingsRepository());
 
-  group('displayInterval', () {
-    test(
-      'defaults to three hours before the user has chosen anything',
-      () async {
-        expect(await repository.getDisplayInterval(), const Duration(hours: 3));
-      },
-    );
-
-    test('returns the interval that was last set', () async {
-      await repository.setDisplayInterval(const Duration(hours: 6));
-
-      expect(await repository.getDisplayInterval(), const Duration(hours: 6));
+  group('activeDeckId', () {
+    test('starts on the deck every install is guaranteed to have', () async {
+      expect(await repository.getActiveDeckId(), defaultDeckId);
     });
 
-    test('accepts an explicit default supplied at construction', () async {
-      final custom = InMemorySettingsRepository(
-        initialInterval: const Duration(hours: 12),
-      );
+    test('returns the deck that was last chosen', () async {
+      await repository.setActiveDeckId('travel');
 
-      expect(await custom.getDisplayInterval(), const Duration(hours: 12));
+      expect(await repository.getActiveDeckId(), 'travel');
     });
 
-    test(
-      'rejects a zero interval, which would schedule infinite reminders',
-      () {
-        expect(
-          () => repository.setDisplayInterval(Duration.zero),
-          throwsArgumentError,
-        );
-      },
-    );
+    test('accepts an explicit starting deck', () async {
+      final custom = InMemorySettingsRepository(initialActiveDeckId: 'travel');
 
-    test('rejects a negative interval', () {
-      expect(
-        () => repository.setDisplayInterval(const Duration(hours: -1)),
-        throwsArgumentError,
-      );
+      expect(await custom.getActiveDeckId(), 'travel');
     });
 
-    test(
-      'leaves the stored interval unchanged after a rejected value',
-      () async {
-        try {
-          await repository.setDisplayInterval(Duration.zero);
-        } on ArgumentError {
-          // Expected — we only care about the state afterwards.
-        }
+    test('rejects an empty id, which would point at no deck at all', () {
+      expect(() => repository.setActiveDeckId(''), throwsArgumentError);
+    });
 
-        expect(await repository.getDisplayInterval(), const Duration(hours: 3));
-      },
-    );
+    test('leaves the stored deck unchanged after a rejected value', () async {
+      try {
+        await repository.setActiveDeckId('');
+      } on ArgumentError {
+        // Expected — only the state afterwards matters here.
+      }
+
+      expect(await repository.getActiveDeckId(), defaultDeckId);
+    });
   });
 }

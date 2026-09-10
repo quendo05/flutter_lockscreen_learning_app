@@ -1,11 +1,9 @@
-/// User preferences that control how often a new term is surfaced.
+/// The preferences that belong to the app rather than to a deck.
+///
+/// How often terms appear and which languages they are in are properties of a
+/// deck, so they live on [Deck]. What remains global is the one thing that
+/// cannot: which single deck is currently feeding the lock screen.
 abstract class SettingsRepository {
-  /// How long to wait between two lock screen terms.
-  Future<Duration> getDisplayInterval();
-
-  /// Stores [interval]. Throws [ArgumentError] if it is not positive.
-  Future<void> setDisplayInterval(Duration interval);
-
   /// The deck currently feeding the lock screen.
   Future<String> getActiveDeckId();
 

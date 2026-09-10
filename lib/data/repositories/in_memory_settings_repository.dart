@@ -1,4 +1,3 @@
-import '../../config/defaults.dart';
 import '../../domain/models/deck.dart';
 import 'settings_repository.dart';
 
@@ -7,29 +6,10 @@ import 'settings_repository.dart';
 /// Used by tests and by the app until preferences are persisted. Nothing here
 /// survives a restart.
 class InMemorySettingsRepository implements SettingsRepository {
-  InMemorySettingsRepository({
-    Duration initialInterval = defaultDisplayInterval,
-    String initialActiveDeckId = defaultDeckId,
-  }) : _displayInterval = initialInterval,
-       _activeDeckId = initialActiveDeckId;
+  InMemorySettingsRepository({String initialActiveDeckId = defaultDeckId})
+    : _activeDeckId = initialActiveDeckId;
 
-  Duration _displayInterval;
   String _activeDeckId;
-
-  @override
-  Future<Duration> getDisplayInterval() async => _displayInterval;
-
-  @override
-  Future<void> setDisplayInterval(Duration interval) async {
-    if (interval <= Duration.zero) {
-      throw ArgumentError.value(
-        interval,
-        'interval',
-        'Display interval must be positive.',
-      );
-    }
-    _displayInterval = interval;
-  }
 
   @override
   Future<String> getActiveDeckId() async => _activeDeckId;

@@ -4,8 +4,14 @@ import 'package:lockscreen_learning_app/domain/models/deck.dart';
 void main() {
   final createdAt = DateTime.utc(2026, 3, 2, 14);
 
-  Deck buildDeck() =>
-      Deck(id: 'd1', name: 'Spanish basics', createdAt: createdAt);
+  Deck buildDeck() => Deck(
+    id: 'd1',
+    name: 'Spanish basics',
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    displayInterval: const Duration(hours: 3),
+    createdAt: createdAt,
+  );
 
   group('Deck equality', () {
     test('treats two decks with identical field values as equal', () {
@@ -13,7 +19,14 @@ void main() {
     });
 
     test('treats a renamed deck as a different value', () {
-      final renamed = Deck(id: 'd1', name: 'Travel', createdAt: createdAt);
+      final renamed = Deck(
+        id: 'd1',
+        name: 'Travel',
+        sourceLanguage: 'es',
+        targetLanguage: 'de',
+        displayInterval: const Duration(hours: 3),
+        createdAt: createdAt,
+      );
 
       expect(renamed, isNot(equals(buildDeck())));
     });

@@ -5,6 +5,9 @@ import 'package:lockscreen_learning_app/domain/models/deck.dart';
 Deck contractDeck(String id, {String? name, DateTime? createdAt}) => Deck(
   id: id,
   name: name ?? 'deck-$id',
+  sourceLanguage: 'es',
+  targetLanguage: 'de',
+  displayInterval: const Duration(hours: 3),
   createdAt: createdAt ?? DateTime.utc(2026, 1, 1),
 );
 

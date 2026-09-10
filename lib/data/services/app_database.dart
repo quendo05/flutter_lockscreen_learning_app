@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 
+import '../../config/defaults.dart';
 import '../../domain/models/deck.dart';
 
 /// Owns the SQLite schema and its migrations.
@@ -13,7 +14,7 @@ class AppDatabase {
   static const vocabsTable = 'vocabs';
 
   /// Bump this and add an [_upgrade] branch whenever the schema changes.
-  static const schemaVersion = 2;
+  static const schemaVersion = 3;
 
   static Future<Database> open(String path) => openDatabase(
     path,
@@ -53,10 +54,28 @@ class AppDatabase {
   }
 
   /// Version 1 had a single flat table of terms and no notion of decks.
+  /// Version 2 had decks, but how a deck was studied lived in global settings.
+  ///
+  /// Each step below spells out the shape it produces rather than calling the
+  /// helpers [_createDecksTable] and [_insertDefaultDeck]. Those describe the
+  /// current schema and move on with it, whereas a migration has to keep
+  /// producing the shape that existed when it was written — otherwise the step
+  /// after it tries to add columns that are already there.
   static Future<void> _upgrade(Database db, int from, int to) async {
     if (from < 2) {
-      await _createDecksTable(db);
-      await _insertDefaultDeck(db);
+      // The decks table as it stood at version 2.
+      await db.execute('''
+        CREATE TABLE $decksTable (
+          id TEXT PRIMARY KEY NOT NULL,
+          name TEXT NOT NULL,
+          createdAt INTEGER NOT NULL
+        )
+      ''');
+      await db.insert(decksTable, {
+        'id': defaultDeckId,
+        'name': defaultDeckName,
+        'createdAt': DateTime.now().toUtc().millisecondsSinceEpoch,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
 
       // The column default backfills every pre-existing row, so terms saved
       // before decks existed end up in the default deck rather than orphaned.
@@ -69,12 +88,34 @@ class AppDatabase {
           ON $vocabsTable (deckId)
       ''');
     }
+
+    if (from < 3) {
+      // How a deck is studied moves out of global settings and onto the deck
+      // itself. The column defaults give every existing deck the pair and pace
+      // the app previously assumed for all of them, so nothing changes for the
+      // user until they open a deck's settings.
+      await db.execute('''
+        ALTER TABLE $decksTable ADD COLUMN sourceLanguage TEXT NOT NULL
+          DEFAULT '$defaultSourceLanguage'
+      ''');
+      await db.execute('''
+        ALTER TABLE $decksTable ADD COLUMN targetLanguage TEXT NOT NULL
+          DEFAULT '$defaultTargetLanguage'
+      ''');
+      await db.execute('''
+        ALTER TABLE $decksTable ADD COLUMN displayIntervalMinutes INTEGER
+          NOT NULL DEFAULT ${defaultDisplayInterval.inMinutes}
+      ''');
+    }
   }
 
   static Future<void> _createDecksTable(Database db) => db.execute('''
         CREATE TABLE $decksTable (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT NOT NULL,
+          sourceLanguage TEXT NOT NULL,
+          targetLanguage TEXT NOT NULL,
+          displayIntervalMinutes INTEGER NOT NULL,
           createdAt INTEGER NOT NULL
         )
       ''');
