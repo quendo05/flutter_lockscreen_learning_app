@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
+import 'package:lockscreen_learning_app/domain/models/deck.dart';
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/vocab_list/view_models/vocab_list_view_model.dart';
 import 'package:lockscreen_learning_app/ui/vocab_list/widgets/vocab_list_screen.dart';
@@ -9,6 +10,15 @@ import 'package:lockscreen_learning_app/ui/vocab_list/widgets/vocab_list_screen.
 import '../../support/vocab_repository_doubles.dart';
 
 void main() {
+  final testDeck = Deck(
+    id: 'd1',
+    name: 'Spanish basics',
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    displayInterval: const Duration(hours: 3),
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
+
   Future<void> pumpScreen(WidgetTester tester, VocabRepository repository) {
     var counter = 0;
     return tester.pumpWidget(
@@ -16,7 +26,7 @@ void main() {
         home: VocabListScreen(
           title: 'Spanish basics',
           viewModel: VocabListViewModel(
-            deckId: 'd1',
+            deck: testDeck,
             repository: repository,
             idGenerator: () => 'id-${++counter}',
           ),
@@ -27,7 +37,7 @@ void main() {
 
   Vocab vocab(String id, String term, String translation) => Vocab(
     id: id,
-    deckId: 'd1',
+    deckId: testDeck.id,
     term: term,
     translation: translation,
     sourceLanguage: 'es',

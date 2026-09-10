@@ -1,5 +1,5 @@
-import '../../../config/defaults.dart';
 import '../../../data/repositories/vocab_repository.dart';
+import '../../../domain/models/deck.dart';
 import '../../../domain/models/vocab.dart';
 import '../../../utils/clock.dart';
 import '../../../utils/id_generator.dart';
@@ -8,15 +8,26 @@ import '../../core/view_models/loadable_view_model.dart';
 /// Drives the vocabulary list screen for a single deck.
 class VocabListViewModel extends LoadableViewModel {
   VocabListViewModel({
-    required this.deckId,
+    required this._deck,
     required this._repository,
     Clock? clock,
     IdGenerator? idGenerator,
   }) : _clock = clock ?? DateTime.now,
        _idGenerator = idGenerator ?? generateId;
 
-  /// The deck whose terms are shown, and that new terms are added to.
-  final String deckId;
+  Deck _deck;
+
+  /// The deck whose terms are shown. New terms are added to it and inherit
+  /// its language pair, so the pair is recorded once per deck rather than
+  /// being guessed per term.
+  Deck get deck => _deck;
+
+  /// Adopts a deck whose settings were just edited, so terms added afterwards
+  /// inherit the new language pair rather than the pair the page opened with.
+  void adoptDeck(Deck deck) {
+    _deck = deck;
+    notifyListeners();
+  }
 
   final VocabRepository _repository;
   final Clock _clock;
@@ -41,8 +52,6 @@ class VocabListViewModel extends LoadableViewModel {
   Future<void> addVocab({
     required String term,
     required String translation,
-    String sourceLanguage = defaultSourceLanguage,
-    String targetLanguage = defaultTargetLanguage,
   }) async {
     final trimmedTerm = term.trim();
     final trimmedTranslation = translation.trim();
@@ -56,11 +65,11 @@ class VocabListViewModel extends LoadableViewModel {
       () => _repository.save(
         Vocab(
           id: _idGenerator(),
-          deckId: deckId,
+          deckId: deck.id,
           term: trimmedTerm,
           translation: trimmedTranslation,
-          sourceLanguage: sourceLanguage,
-          targetLanguage: targetLanguage,
+          sourceLanguage: deck.sourceLanguage,
+          targetLanguage: deck.targetLanguage,
           createdAt: _clock(),
         ),
       ),
@@ -72,7 +81,7 @@ class VocabListViewModel extends LoadableViewModel {
 
   @override
   Future<void> readContent() async {
-    _vocabs = await _repository.getByDeck(deckId);
+    _vocabs = await _repository.getByDeck(deck.id);
   }
 
   @override

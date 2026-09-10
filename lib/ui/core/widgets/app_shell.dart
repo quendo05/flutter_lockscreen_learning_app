@@ -68,8 +68,11 @@ class _AppShellState extends State<AppShell> {
   Future<void> _openDeck(Deck deck) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) =>
-            DeckVocabPage(deck: deck, vocabRepository: widget.vocabRepository),
+        builder: (_) => DeckVocabPage(
+          deck: deck,
+          vocabRepository: widget.vocabRepository,
+          deckRepository: widget.deckRepository,
+        ),
       ),
     );
     await _deckListViewModel.load();

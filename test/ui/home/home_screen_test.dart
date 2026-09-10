@@ -37,6 +37,9 @@ void main() {
                 Deck(
                   id: 'd1',
                   name: 'Spanish basics',
+                  sourceLanguage: 'es',
+                  targetLanguage: 'de',
+                  displayInterval: const Duration(hours: 3),
                   createdAt: DateTime.utc(2026, 1, 1),
                 ),
               ],

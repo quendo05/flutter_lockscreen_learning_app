@@ -1,3 +1,4 @@
+import '../../../config/defaults.dart';
 import '../../../data/repositories/deck_repository.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../../data/repositories/vocab_repository.dart';
@@ -53,7 +54,14 @@ class DeckListViewModel extends LoadableViewModel {
 
     await guard(
       () => _deckRepository.save(
-        Deck(id: _idGenerator(), name: trimmed, createdAt: _clock()),
+        Deck(
+          id: _idGenerator(),
+          name: trimmed,
+          sourceLanguage: defaultSourceLanguage,
+          targetLanguage: defaultTargetLanguage,
+          displayInterval: defaultDisplayInterval,
+          createdAt: _clock(),
+        ),
       ),
     );
   }

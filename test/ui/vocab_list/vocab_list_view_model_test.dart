@@ -1,17 +1,27 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
+import 'package:lockscreen_learning_app/domain/models/deck.dart';
 import 'package:lockscreen_learning_app/ui/vocab_list/view_models/vocab_list_view_model.dart';
 
 import '../../support/vocab_repository_doubles.dart';
 
 void main() {
+  final testDeck = Deck(
+    id: 'd1',
+    name: 'Spanish basics',
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    displayInterval: const Duration(hours: 3),
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
+
   final fixedNow = DateTime.utc(2026, 6, 1, 12);
 
   VocabListViewModel buildViewModel(VocabRepository repository) {
     var counter = 0;
     return VocabListViewModel(
-      deckId: 'd1',
+      deck: testDeck,
       repository: repository,
       clock: () => fixedNow,
       idGenerator: () => 'id-${++counter}',
@@ -82,7 +92,7 @@ void main() {
     test('shows only the terms belonging to this deck', () async {
       final repository = InMemoryVocabRepository();
       final other = VocabListViewModel(
-        deckId: 'other-deck',
+        deck: testDeck.copyWith(id: 'other-deck'),
         repository: repository,
       );
       await other.addVocab(term: 'le livre', translation: 'das Buch');

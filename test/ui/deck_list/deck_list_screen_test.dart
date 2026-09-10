@@ -23,8 +23,14 @@ void main() {
 
   setUp(opened.clear);
 
-  Deck deck(String id, String name) =>
-      Deck(id: id, name: name, createdAt: DateTime.utc(2026, 1, 1));
+  Deck deck(String id, String name) => Deck(
+    id: id,
+    name: name,
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    displayInterval: const Duration(hours: 3),
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
 
   Vocab vocab(String id, String deckId) => Vocab(
     id: id,

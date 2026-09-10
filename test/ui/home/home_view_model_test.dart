@@ -30,12 +30,18 @@ void main() {
   }) => HomeViewModel(
     vocabRepository: vocabRepository ?? InMemoryVocabRepository(),
     deckRepository: InMemoryDeckRepository(
-      initialDecks: [Deck(id: 'd1', name: 'Spanish basics', createdAt: now)],
+      initialDecks: [
+        Deck(
+          id: 'd1',
+          name: 'Spanish basics',
+          sourceLanguage: 'es',
+          targetLanguage: 'de',
+          displayInterval: interval,
+          createdAt: now,
+        ),
+      ],
     ),
-    settingsRepository: InMemorySettingsRepository(
-      initialInterval: interval,
-      initialActiveDeckId: 'd1',
-    ),
+    settingsRepository: InMemorySettingsRepository(initialActiveDeckId: 'd1'),
     clock: () => now,
   );
 

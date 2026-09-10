@@ -10,6 +10,7 @@ class VocabListScreen extends StatefulWidget {
   const VocabListScreen({
     required this.title,
     required this.viewModel,
+    this.actions = const [],
     super.key,
   });
 
@@ -17,6 +18,9 @@ class VocabListScreen extends StatefulWidget {
   final String title;
 
   final VocabListViewModel viewModel;
+
+  /// Extra app bar actions, supplied by whoever opened this screen.
+  final List<Widget> actions;
 
   @override
   State<VocabListScreen> createState() => _VocabListScreenState();
@@ -60,7 +64,7 @@ class _VocabListScreenState extends State<VocabListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
+      appBar: AppBar(title: Text(widget.title), actions: widget.actions),
       body: ListenableBuilder(
         listenable: widget.viewModel,
         builder: (context, _) => _VocabListBody(viewModel: widget.viewModel),

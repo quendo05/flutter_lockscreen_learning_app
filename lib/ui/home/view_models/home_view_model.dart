@@ -1,3 +1,4 @@
+import '../../../config/defaults.dart';
 import '../../../data/repositories/deck_repository.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../../data/repositories/vocab_repository.dart';
@@ -57,8 +58,11 @@ class HomeViewModel extends LoadableViewModel {
     final activeDeckId = await _settingsRepository.getActiveDeckId();
     final vocabs = await _vocabRepository.getByDeck(activeDeckId);
 
-    _activeDeckName = (await _deckRepository.getById(activeDeckId))?.name;
-    _displayInterval = await _settingsRepository.getDisplayInterval();
+    final activeDeck = await _deckRepository.getById(activeDeckId);
+    _activeDeckName = activeDeck?.name;
+    // The pace belongs to the deck, so a patient deck and a brisk one can
+    // coexist instead of sharing one global setting.
+    _displayInterval = activeDeck?.displayInterval ?? defaultDisplayInterval;
     _vocabularyCount = vocabs.length;
 
     // Two entries is enough for the screen: the term showing now, and the

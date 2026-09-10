@@ -9,18 +9,24 @@ import 'package:lockscreen_learning_app/ui/deck_list/view_models/deck_list_view_
 void main() {
   final now = DateTime.utc(2026, 8, 1, 10);
 
-  Deck deck(String id, {String? name}) =>
-      Deck(id: id, name: name ?? 'deck-$id', createdAt: DateTime.utc(2026, 1, 1));
+  Deck deck(String id, {String? name}) => Deck(
+    id: id,
+    name: name ?? 'deck-$id',
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    displayInterval: const Duration(hours: 3),
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
 
   Vocab vocab(String id, String deckId) => Vocab(
-        id: id,
-        deckId: deckId,
-        term: 'term-$id',
-        translation: 'translation-$id',
-        sourceLanguage: 'es',
-        targetLanguage: 'de',
-        createdAt: DateTime.utc(2026, 1, 1),
-      );
+    id: id,
+    deckId: deckId,
+    term: 'term-$id',
+    translation: 'translation-$id',
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
 
   DeckListViewModel buildViewModel({
     List<Deck> decks = const [],
@@ -31,8 +37,9 @@ void main() {
     return DeckListViewModel(
       deckRepository: InMemoryDeckRepository(initialDecks: decks),
       vocabRepository: InMemoryVocabRepository(initialEntries: vocabs),
-      settingsRepository:
-          InMemorySettingsRepository(initialActiveDeckId: activeDeckId),
+      settingsRepository: InMemorySettingsRepository(
+        initialActiveDeckId: activeDeckId,
+      ),
       clock: () => now,
       idGenerator: () => 'new-${++counter}',
     );
