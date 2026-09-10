@@ -70,7 +70,7 @@ class _HomeBody extends StatelessWidget {
       );
     }
 
-    if (viewModel.hasNoVocabulary) {
+    if (viewModel.isEmpty) {
       return MessageState(
         icon: Icons.lock_outline,
         title: 'Nothing on your lock screen yet',

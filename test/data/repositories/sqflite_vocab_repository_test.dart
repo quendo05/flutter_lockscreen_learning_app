@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/sqflite_vocab_repository.dart';
 import 'package:lockscreen_learning_app/data/services/app_database.dart';
 import 'package:lockscreen_learning_app/domain/models/deck.dart';
+import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -44,7 +45,9 @@ void main() {
       await first.close();
 
       final second = await AppDatabase.open(path);
-      final reloaded = await SqfliteVocabRepository(second).getAll();
+      final reloaded = await SqfliteVocabRepository(
+        second,
+      ).getByDeck(contractDeckId);
       await second.close();
 
       expect(reloaded.single.id, 'a');
@@ -95,28 +98,26 @@ void main() {
         await db.close();
       }
 
+      /// The migration files pre-existing terms into the default deck, so
+      /// reading that deck back is what proves they survived reachable.
+      Future<List<Vocab>> migratedDefaultDeck(String path) async {
+        final database = await AppDatabase.open(path);
+        final entries = await SqfliteVocabRepository(
+          database,
+        ).getByDeck(defaultDeckId);
+        await database.close();
+        return entries;
+      }
+
       test('keeps terms that were saved before decks existed', () async {
         final path = p.join(tempDir.path, 'vocab.db');
         await writeVersion1Database(path);
 
-        final database = await AppDatabase.open(path);
-        final entries = await SqfliteVocabRepository(database).getAll();
-        await database.close();
+        final entries = await migratedDefaultDeck(path);
 
         expect(entries, hasLength(1));
         expect(entries.single.term, 'la biblioteca');
         expect(entries.single.timesShown, 3);
-      });
-
-      test('files those terms into the default deck', () async {
-        final path = p.join(tempDir.path, 'vocab.db');
-        await writeVersion1Database(path);
-
-        final database = await AppDatabase.open(path);
-        final entries = await SqfliteVocabRepository(database).getAll();
-        await database.close();
-
-        expect(entries.single.deckId, defaultDeckId);
       });
 
       test('creates the default deck so the terms are reachable', () async {

@@ -34,13 +34,7 @@ Future<LockscreenLearningApp> _buildApp() async {
       // On device the schema seeds this deck; in memory nothing does, so the
       // app would otherwise start with nowhere to save.
       deckRepository: InMemoryDeckRepository(
-        initialDecks: [
-          Deck(
-            id: defaultDeckId,
-            name: defaultDeckName,
-            createdAt: DateTime.now().toUtc(),
-          ),
-        ],
+        initialDecks: [Deck.initial(createdAt: DateTime.now().toUtc())],
       ),
       settingsRepository: InMemorySettingsRepository(),
     );

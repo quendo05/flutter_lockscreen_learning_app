@@ -101,7 +101,7 @@ class _DeckListBody extends StatelessWidget {
       );
     }
 
-    if (viewModel.hasNoDecks) {
+    if (viewModel.isEmpty) {
       return const MessageState(
         icon: Icons.style_outlined,
         title: 'No decks yet',

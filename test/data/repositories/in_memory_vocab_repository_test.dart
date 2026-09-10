@@ -13,6 +13,6 @@ void main() {
       initialEntries: [contractVocab('seeded')],
     );
 
-    expect((await repository.getAll()).single.id, 'seeded');
+    expect((await repository.getByDeck(contractDeckId)).single.id, 'seeded');
   });
 }

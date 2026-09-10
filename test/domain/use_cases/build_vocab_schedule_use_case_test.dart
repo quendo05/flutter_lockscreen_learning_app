@@ -5,7 +5,7 @@ import 'package:lockscreen_learning_app/domain/use_cases/build_vocab_schedule_us
 void main() {
   final from = DateTime.utc(2026, 5, 1, 8, 0);
   const interval = Duration(hours: 3);
-  final useCase = BuildVocabScheduleUseCase();
+  const useCase = BuildVocabScheduleUseCase();
 
   Vocab vocab(
     String id, {

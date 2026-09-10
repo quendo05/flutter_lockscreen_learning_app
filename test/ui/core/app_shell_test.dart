@@ -7,11 +7,7 @@ import 'package:lockscreen_learning_app/domain/models/deck.dart';
 import 'package:lockscreen_learning_app/ui/core/widgets/app_shell.dart';
 
 void main() {
-  Deck seededDeck() => Deck(
-        id: defaultDeckId,
-        name: defaultDeckName,
-        createdAt: DateTime.utc(2026, 1, 1),
-      );
+  Deck seededDeck() => Deck.initial(createdAt: DateTime.utc(2026, 1, 1));
 
   Future<void> pumpShell(WidgetTester tester) {
     return tester.pumpWidget(

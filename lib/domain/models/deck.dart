@@ -18,17 +18,20 @@ class Deck {
     required this.createdAt,
   });
 
+  /// The deck a fresh install starts with, and the one the v1 -> v2 migration
+  /// files pre-existing terms under.
+  ///
+  /// Built here so the seed cannot drift between the schema, the web build
+  /// and the tests, which each need to produce the same deck.
+  factory Deck.initial({required DateTime createdAt}) => Deck(
+        id: defaultDeckId,
+        name: defaultDeckName,
+        createdAt: createdAt,
+      );
+
   final String id;
   final String name;
   final DateTime createdAt;
-
-  Deck copyWith({String? id, String? name, DateTime? createdAt}) {
-    return Deck(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
 
   Map<String, Object?> toMap() => {
         'id': id,

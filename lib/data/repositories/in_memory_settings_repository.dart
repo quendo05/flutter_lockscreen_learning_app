@@ -1,8 +1,6 @@
+import '../../config/defaults.dart';
 import '../../domain/models/deck.dart';
 import 'settings_repository.dart';
-
-/// Default cadence: a new term every three hours.
-const kDefaultDisplayInterval = Duration(hours: 3);
 
 /// A [SettingsRepository] that keeps preferences in memory.
 ///
@@ -10,7 +8,7 @@ const kDefaultDisplayInterval = Duration(hours: 3);
 /// survives a restart.
 class InMemorySettingsRepository implements SettingsRepository {
   InMemorySettingsRepository({
-    Duration initialInterval = kDefaultDisplayInterval,
+    Duration initialInterval = defaultDisplayInterval,
     String initialActiveDeckId = defaultDeckId,
   })  : _displayInterval = initialInterval,
         _activeDeckId = initialActiveDeckId;

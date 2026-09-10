@@ -7,9 +7,6 @@ import '../../domain/models/vocab.dart';
 /// in-memory implementation for a persistent one does not ripple through the
 /// view models.
 abstract class VocabRepository {
-  /// All stored entries, newest first.
-  Future<List<Vocab>> getAll();
-
   /// The entries belonging to [deckId], newest first.
   Future<List<Vocab>> getByDeck(String deckId);
 

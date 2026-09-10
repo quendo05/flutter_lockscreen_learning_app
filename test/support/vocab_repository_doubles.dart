@@ -10,8 +10,6 @@ import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 /// chore instead of a one-line change.
 class FailingVocabRepository implements VocabRepository {
   @override
-  Future<List<Vocab>> getAll() async => throw Exception('offline');
-  @override
   Future<List<Vocab>> getByDeck(String deckId) async =>
       throw Exception('offline');
   @override
@@ -25,8 +23,6 @@ class FailingVocabRepository implements VocabRepository {
 /// A repository whose reads never complete, so a screen stays in its loading
 /// state for as long as the test needs.
 class HangingVocabRepository implements VocabRepository {
-  @override
-  Future<List<Vocab>> getAll() => Completer<List<Vocab>>().future;
   @override
   Future<List<Vocab>> getByDeck(String deckId) =>
       Completer<List<Vocab>>().future;

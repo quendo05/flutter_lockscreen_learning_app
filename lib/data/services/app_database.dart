@@ -82,11 +82,7 @@ class AppDatabase {
   /// Every install has at least one deck, so there is always somewhere to save.
   static Future<void> _insertDefaultDeck(Database db) => db.insert(
         decksTable,
-        Deck(
-          id: defaultDeckId,
-          name: defaultDeckName,
-          createdAt: DateTime.now().toUtc(),
-        ).toMap(),
+        Deck.initial(createdAt: DateTime.now().toUtc()).toMap(),
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
 

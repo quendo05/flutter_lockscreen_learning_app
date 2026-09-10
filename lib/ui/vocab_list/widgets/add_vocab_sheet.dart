@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../core/widgets/form_sheet.dart';
+
 /// Bottom sheet for entering a single new vocabulary pair.
 ///
-/// Guides the user towards a saveable entry rather than letting them submit
-/// and then reporting a failure: Save stays unavailable until both fields have
-/// content, and a field the user leaves behind empty says so immediately.
+/// Guides the user towards a saveable entry: a field they leave behind empty
+/// says so immediately, rather than waiting for the save to be rejected.
 ///
 /// The view model still enforces the same rule, since an entry could also
 /// arrive from an import or the translation service later on. This is the
@@ -73,58 +74,40 @@ class _AddVocabSheetState extends State<AddVocabSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      // Lifts the sheet clear of the on-screen keyboard.
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.viewInsetsOf(context).bottom + 24,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text('New vocabulary', style: theme.textTheme.titleLarge),
-          const SizedBox(height: 16),
-          TextField(
-            key: const Key('term-field'),
-            controller: _termController,
-            focusNode: _termFocus,
-            autofocus: true,
-            textInputAction: TextInputAction.next,
-            onSubmitted: (_) => _translationFocus.requestFocus(),
-            decoration: InputDecoration(
-              labelText: 'Term',
-              helperText: 'In the language you are learning',
-              errorText: _errorFor(visited: _termVisited, value: _term),
+    return FormSheet(
+      title: 'New vocabulary',
+      submitLabel: 'Save',
+      onSubmit: _canSave ? _submit : null,
+      fields: [
+        TextField(
+          key: const Key('term-field'),
+          controller: _termController,
+          focusNode: _termFocus,
+          autofocus: true,
+          textInputAction: TextInputAction.next,
+          onSubmitted: (_) => _translationFocus.requestFocus(),
+          decoration: InputDecoration(
+            labelText: 'Term',
+            helperText: 'In the language you are learning',
+            errorText: _errorFor(visited: _termVisited, value: _term),
+          ),
+        ),
+        TextField(
+          key: const Key('translation-field'),
+          controller: _translationController,
+          focusNode: _translationFocus,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _submit(),
+          decoration: InputDecoration(
+            labelText: 'Translation',
+            helperText: 'In the language you already speak',
+            errorText: _errorFor(
+              visited: _translationVisited,
+              value: _translation,
             ),
           ),
-          const SizedBox(height: 16),
-          TextField(
-            key: const Key('translation-field'),
-            controller: _translationController,
-            focusNode: _translationFocus,
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => _submit(),
-            decoration: InputDecoration(
-              labelText: 'Translation',
-              helperText: 'In the language you already speak',
-              errorText: _errorFor(
-                visited: _translationVisited,
-                value: _translation,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _canSave ? _submit : null,
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

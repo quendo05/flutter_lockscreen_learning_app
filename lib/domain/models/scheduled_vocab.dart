@@ -10,11 +10,6 @@ class ScheduledVocab {
   final DateTime showAt;
   final Vocab vocab;
 
-  Map<String, Object?> toMap() => {
-        'showAt': showAt.millisecondsSinceEpoch,
-        'vocab': vocab.toMap(),
-      };
-
   @override
   bool operator ==(Object other) =>
       other is ScheduledVocab && other.showAt == showAt && other.vocab == vocab;

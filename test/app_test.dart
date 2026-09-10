@@ -11,13 +11,7 @@ void main() {
       LockscreenLearningApp(
         vocabRepository: InMemoryVocabRepository(),
         deckRepository: InMemoryDeckRepository(
-          initialDecks: [
-            Deck(
-              id: defaultDeckId,
-              name: defaultDeckName,
-              createdAt: DateTime.utc(2026, 1, 1),
-            ),
-          ],
+          initialDecks: [Deck.initial(createdAt: DateTime.utc(2026, 1, 1))],
         ),
         settingsRepository: InMemorySettingsRepository(),
       ),

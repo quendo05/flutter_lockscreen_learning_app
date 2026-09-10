@@ -16,7 +16,9 @@ void main() {
     });
 
     test('treats a renamed deck as a different value', () {
-      expect(buildDeck().copyWith(name: 'Travel'), isNot(equals(buildDeck())));
+      final renamed = Deck(id: 'd1', name: 'Travel', createdAt: createdAt);
+
+      expect(renamed, isNot(equals(buildDeck())));
     });
 
     test('gives equal decks the same hashCode so they deduplicate in a Set', () {
@@ -24,17 +26,13 @@ void main() {
     });
   });
 
-  group('Deck.copyWith', () {
-    test('replaces only the named field and preserves the rest', () {
-      final renamed = buildDeck().copyWith(name: 'Travel');
+  group('Deck.initial', () {
+    test('carries the id and name the schema seeds', () {
+      final deck = Deck.initial(createdAt: createdAt);
 
-      expect(renamed.name, 'Travel');
-      expect(renamed.id, 'd1');
-      expect(renamed.createdAt, createdAt);
-    });
-
-    test('returns an equal deck when no replacements are given', () {
-      expect(buildDeck().copyWith(), equals(buildDeck()));
+      expect(deck.id, defaultDeckId);
+      expect(deck.name, defaultDeckName);
+      expect(deck.createdAt, createdAt);
     });
   });
 

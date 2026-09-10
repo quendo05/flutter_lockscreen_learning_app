@@ -16,12 +16,6 @@ class SqfliteVocabRepository implements VocabRepository {
   static const _table = AppDatabase.vocabsTable;
 
   @override
-  Future<List<Vocab>> getAll() async {
-    final rows = await _database.query(_table, orderBy: 'createdAt DESC');
-    return rows.map(Vocab.fromMap).toList();
-  }
-
-  @override
   Future<List<Vocab>> getByDeck(String deckId) async {
     final rows = await _database.query(
       _table,

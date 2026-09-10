@@ -1,17 +1,14 @@
-import 'package:flutter/foundation.dart';
-
 import '../../../data/repositories/deck_repository.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../../data/repositories/vocab_repository.dart';
 import '../../../domain/models/scheduled_vocab.dart';
 import '../../../domain/use_cases/build_vocab_schedule_use_case.dart';
-
-/// Supplies the current time. Injectable so tests stay deterministic.
-typedef Clock = DateTime Function();
+import '../../../utils/clock.dart';
+import '../../core/view_models/loadable_view_model.dart';
 
 /// Drives the home screen: what the lock screen will show next, and how much
 /// vocabulary is behind it.
-class HomeViewModel extends ChangeNotifier {
+class HomeViewModel extends LoadableViewModel {
   HomeViewModel({
     required this._vocabRepository,
     required this._deckRepository,
@@ -26,20 +23,12 @@ class HomeViewModel extends ChangeNotifier {
   final BuildVocabScheduleUseCase _buildSchedule;
   final Clock _clock;
 
-  bool _isLoading = false;
-  String? _loadError;
   int _vocabularyCount = 0;
   List<ScheduledVocab> _upcoming = const [];
   Duration _displayInterval = Duration.zero;
   String? _activeDeckName;
 
-  /// True while the repositories are being read.
-  bool get isLoading => _isLoading;
-
-  /// Set when the store could not be read.
-  String? get loadError => _loadError;
-
-  /// How many terms the user has saved.
+  /// How many terms the user has saved in the deck feeding the lock screen.
   int get vocabularyCount => _vocabularyCount;
 
   /// The term due now, or null when there is nothing to show.
@@ -55,43 +44,36 @@ class HomeViewModel extends ChangeNotifier {
   /// The name of the deck currently feeding the lock screen.
   String? get activeDeckName => _activeDeckName;
 
-  /// True only when loading succeeded and the user has saved nothing yet.
-  /// A failed read is not an empty collection, so it must not claim to be one.
-  bool get hasNoVocabulary =>
-      !_isLoading && _loadError == null && _vocabularyCount == 0;
+  @override
+  bool get hasNoContent => _vocabularyCount == 0;
 
-  Future<void> load() async {
-    _isLoading = true;
-    _loadError = null;
-    notifyListeners();
+  @override
+  String get loadErrorMessage =>
+      'Could not read your vocabulary. Please try again.';
 
-    try {
-      // Only the active deck reaches the lock screen, so only it belongs here.
-      final activeDeckId = await _settingsRepository.getActiveDeckId();
-      final vocabs = await _vocabRepository.getByDeck(activeDeckId);
-      _activeDeckName = (await _deckRepository.getById(activeDeckId))?.name;
-      _displayInterval = await _settingsRepository.getDisplayInterval();
-      _vocabularyCount = vocabs.length;
+  @override
+  Future<void> readContent() async {
+    // Only the active deck reaches the lock screen, so only it belongs here.
+    final activeDeckId = await _settingsRepository.getActiveDeckId();
+    final vocabs = await _vocabRepository.getByDeck(activeDeckId);
 
-      // Two entries is enough for the screen: the term showing now, and the
-      // time the next one takes over.
-      _upcoming = _buildSchedule(
-        vocabs: vocabs,
-        interval: _displayInterval,
-        from: _clock(),
-        count: vocabs.isEmpty ? 0 : 2,
-      );
-    } on Object catch (error) {
-      debugPrint('HomeViewModel: $error');
-      _upcoming = const [];
-      _vocabularyCount = 0;
-      _isLoading = false;
-      _loadError = 'Could not read your vocabulary. Please try again.';
-      notifyListeners();
-      return;
-    }
+    _activeDeckName = (await _deckRepository.getById(activeDeckId))?.name;
+    _displayInterval = await _settingsRepository.getDisplayInterval();
+    _vocabularyCount = vocabs.length;
 
-    _isLoading = false;
-    notifyListeners();
+    // Two entries is enough for the screen: the term showing now, and the
+    // time the next one takes over.
+    _upcoming = _buildSchedule(
+      vocabs: vocabs,
+      interval: _displayInterval,
+      from: _clock(),
+      count: vocabs.isEmpty ? 0 : 2,
+    );
+  }
+
+  @override
+  void discardContent() {
+    _upcoming = const [];
+    _vocabularyCount = 0;
   }
 }

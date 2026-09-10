@@ -15,16 +15,12 @@ class InMemoryVocabRepository implements VocabRepository {
   final Map<String, Vocab> _entriesById = {};
 
   @override
-  Future<List<Vocab>> getAll() async {
-    final entries = _entriesById.values.toList()
+  Future<List<Vocab>> getByDeck(String deckId) async {
+    final entries = _entriesById.values
+        .where((entry) => entry.deckId == deckId)
+        .toList()
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return entries;
-  }
-
-  @override
-  Future<List<Vocab>> getByDeck(String deckId) async {
-    final entries = await getAll();
-    return entries.where((entry) => entry.deckId == deckId).toList();
   }
 
   @override

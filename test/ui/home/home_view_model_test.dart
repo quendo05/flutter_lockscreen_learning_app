@@ -47,7 +47,7 @@ void main() {
 
       await viewModel.load();
 
-      expect(viewModel.hasNoVocabulary, isTrue);
+      expect(viewModel.isEmpty, isTrue);
       expect(viewModel.loadError, isNull);
       expect(viewModel.isLoading, isFalse);
     });
@@ -119,7 +119,7 @@ void main() {
     test('is not treated as an empty collection', () async {
       final viewModel = await loadedWith([vocab('a')]);
 
-      expect(viewModel.hasNoVocabulary, isFalse);
+      expect(viewModel.isEmpty, isFalse);
     });
   });
 
@@ -143,7 +143,7 @@ void main() {
 
       await viewModel.load();
 
-      expect(viewModel.hasNoVocabulary, isFalse);
+      expect(viewModel.isEmpty, isFalse);
     });
   });
 

@@ -2,16 +2,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 
-Vocab contractVocab(String id, {DateTime? createdAt, String deckId = 'd1'}) =>
-    Vocab(
-      id: id,
-      deckId: deckId,
-      term: 'term-$id',
-      translation: 'translation-$id',
-      sourceLanguage: 'es',
-      targetLanguage: 'de',
-      createdAt: createdAt ?? DateTime.utc(2026, 1, 1),
-    );
+/// The deck [contractVocab] files terms under unless told otherwise.
+const contractDeckId = 'd1';
+
+Vocab contractVocab(
+  String id, {
+  DateTime? createdAt,
+  String deckId = contractDeckId,
+}) => Vocab(
+  id: id,
+  deckId: deckId,
+  term: 'term-$id',
+  translation: 'translation-$id',
+  sourceLanguage: 'es',
+  targetLanguage: 'de',
+  createdAt: createdAt ?? DateTime.utc(2026, 1, 1),
+);
 
 /// The behaviour every [VocabRepository] implementation must satisfy.
 ///
@@ -22,47 +28,11 @@ void runVocabRepositoryContract(Future<VocabRepository> Function() create) {
 
   setUp(() async => repository = await create());
 
-  group('getAll', () {
-    test('returns an empty list for a fresh repository', () async {
-      expect(await repository.getAll(), isEmpty);
-    });
-
-    test('returns entries newest first, regardless of insertion order', () async {
-      await repository.save(contractVocab('old', createdAt: DateTime.utc(2026, 1, 1)));
-      await repository.save(contractVocab('new', createdAt: DateTime.utc(2026, 3, 1)));
-      await repository.save(contractVocab('mid', createdAt: DateTime.utc(2026, 2, 1)));
-
-      final ids = (await repository.getAll()).map((v) => v.id).toList();
-
-      expect(ids, ['new', 'mid', 'old']);
-    });
-
-    test('returns a copy, so mutating the result cannot corrupt the store', () async {
-      await repository.save(contractVocab('a'));
-
-      (await repository.getAll()).clear();
-
-      expect(await repository.getAll(), hasLength(1));
-    });
-
-    test('preserves every field through a save and read cycle', () async {
-      final full = contractVocab('a').copyWith(
-        lastShownAt: DateTime.utc(2026, 4, 5, 7, 30),
-        timesShown: 4,
-      );
-      await repository.save(full);
-
-      expect((await repository.getAll()).single, equals(full));
-    });
-
-    test('preserves a null lastShownAt', () async {
-      await repository.save(contractVocab('a'));
-
-      expect((await repository.getAll()).single.lastShownAt, isNull);
-    });
-  });
-
   group('getByDeck', () {
+    test('returns an empty list for a fresh repository', () async {
+      expect(await repository.getByDeck(contractDeckId), isEmpty);
+    });
+
     test('returns only the terms belonging to that deck', () async {
       await repository.save(contractVocab('a', deckId: 'spanish'));
       await repository.save(contractVocab('b', deckId: 'french'));
@@ -73,27 +43,58 @@ void runVocabRepositoryContract(Future<VocabRepository> Function() create) {
       expect(ids, unorderedEquals(['a', 'c']));
     });
 
-    test('returns those terms newest first', () async {
-      await repository.save(contractVocab(
-        'old',
-        deckId: 'spanish',
-        createdAt: DateTime.utc(2026, 1, 1),
-      ));
-      await repository.save(contractVocab(
-        'new',
-        deckId: 'spanish',
-        createdAt: DateTime.utc(2026, 5, 1),
-      ));
-
-      final ids = (await repository.getByDeck('spanish')).map((v) => v.id);
-
-      expect(ids, ['new', 'old']);
-    });
-
     test('is empty for a deck holding nothing', () async {
       await repository.save(contractVocab('a', deckId: 'spanish'));
 
       expect(await repository.getByDeck('french'), isEmpty);
+    });
+
+    test(
+      'returns entries newest first, whatever the insertion order',
+      () async {
+        await repository.save(
+          contractVocab('old', createdAt: DateTime.utc(2026, 1, 1)),
+        );
+        await repository.save(
+          contractVocab('new', createdAt: DateTime.utc(2026, 3, 1)),
+        );
+        await repository.save(
+          contractVocab('mid', createdAt: DateTime.utc(2026, 2, 1)),
+        );
+
+        final ids = (await repository.getByDeck(contractDeckId))
+            .map((v) => v.id);
+
+        expect(ids, ['new', 'mid', 'old']);
+      },
+    );
+
+    test(
+      'returns a copy, so mutating the result cannot corrupt the store',
+      () async {
+        await repository.save(contractVocab('a'));
+
+        (await repository.getByDeck(contractDeckId)).clear();
+
+        expect(await repository.getByDeck(contractDeckId), hasLength(1));
+      },
+    );
+
+    test('preserves every field through a save and read cycle', () async {
+      final full = contractVocab(
+        'a',
+      ).copyWith(lastShownAt: DateTime.utc(2026, 4, 5, 7, 30), timesShown: 4);
+      await repository.save(full);
+
+      expect((await repository.getByDeck(contractDeckId)).single, equals(full));
+    });
+
+    test('preserves a null lastShownAt', () async {
+      await repository.save(contractVocab('a'));
+
+      final stored = (await repository.getByDeck(contractDeckId)).single;
+
+      expect(stored.lastShownAt, isNull);
     });
   });
 
@@ -106,9 +107,11 @@ void runVocabRepositoryContract(Future<VocabRepository> Function() create) {
 
     test('replaces the existing entry when the id is already stored', () async {
       await repository.save(contractVocab('a'));
-      await repository.save(contractVocab('a').copyWith(translation: 'corrected'));
+      await repository.save(
+        contractVocab('a').copyWith(translation: 'corrected'),
+      );
 
-      final stored = await repository.getAll();
+      final stored = await repository.getByDeck(contractDeckId);
 
       expect(stored, hasLength(1));
       expect(stored.single.translation, 'corrected');
@@ -124,9 +127,10 @@ void runVocabRepositoryContract(Future<VocabRepository> Function() create) {
   group('delete', () {
     test('removes the entry with the given id', () async {
       await repository.save(contractVocab('a'));
+
       await repository.delete('a');
 
-      expect(await repository.getAll(), isEmpty);
+      expect(await repository.getByDeck(contractDeckId), isEmpty);
     });
 
     test('leaves other entries untouched', () async {
@@ -135,7 +139,7 @@ void runVocabRepositoryContract(Future<VocabRepository> Function() create) {
 
       await repository.delete('a');
 
-      expect((await repository.getAll()).single.id, 'b');
+      expect((await repository.getByDeck(contractDeckId)).single.id, 'b');
     });
 
     test('is a no-op for an unknown id rather than throwing', () async {
