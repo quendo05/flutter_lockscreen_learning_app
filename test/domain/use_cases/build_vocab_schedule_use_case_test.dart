@@ -7,22 +7,17 @@ void main() {
   const interval = Duration(hours: 3);
   const useCase = BuildVocabScheduleUseCase();
 
-  Vocab vocab(
-    String id, {
-    DateTime? lastShownAt,
-    int timesShown = 0,
-  }) =>
-      Vocab(
-        id: id,
-        deckId: 'd1',
-        term: 'term-$id',
-        translation: 'translation-$id',
-        sourceLanguage: 'es',
-        targetLanguage: 'de',
-        createdAt: DateTime.utc(2026, 1, 1),
-        lastShownAt: lastShownAt,
-        timesShown: timesShown,
-      );
+  Vocab vocab(String id, {DateTime? lastShownAt, int timesShown = 0}) => Vocab(
+    id: id,
+    deckId: 'd1',
+    term: 'term-$id',
+    translation: 'translation-$id',
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    createdAt: DateTime.utc(2026, 1, 1),
+    lastShownAt: lastShownAt,
+    timesShown: timesShown,
+  );
 
   group('empty results', () {
     test('returns nothing when there are no vocabulary entries', () {
@@ -68,10 +63,11 @@ void main() {
         count: 3,
       );
 
-      expect(
-        schedule.map((e) => e.showAt).toList(),
-        [from, from.add(interval), from.add(interval * 2)],
-      );
+      expect(schedule.map((e) => e.showAt).toList(), [
+        from,
+        from.add(interval),
+        from.add(interval * 2),
+      ]);
     });
 
     test('produces exactly the requested number of entries', () {
@@ -104,7 +100,11 @@ void main() {
     test('shows the least recently seen term first among seen terms', () {
       final schedule = useCase(
         vocabs: [
-          vocab('recent', lastShownAt: DateTime.utc(2026, 4, 30), timesShown: 1),
+          vocab(
+            'recent',
+            lastShownAt: DateTime.utc(2026, 4, 30),
+            timesShown: 1,
+          ),
           vocab('stale', lastShownAt: DateTime.utc(2026, 1, 5), timesShown: 1),
         ],
         interval: interval,
@@ -117,10 +117,7 @@ void main() {
 
     test('prefers the least practised term when neither has been seen', () {
       final schedule = useCase(
-        vocabs: [
-          vocab('drilled', timesShown: 9),
-          vocab('rare', timesShown: 2),
-        ],
+        vocabs: [vocab('drilled', timesShown: 9), vocab('rare', timesShown: 2)],
         interval: interval,
         from: from,
         count: 2,
@@ -150,10 +147,13 @@ void main() {
         count: 5,
       );
 
-      expect(
-        schedule.map((e) => e.vocab.id).toList(),
-        ['a', 'b', 'a', 'b', 'a'],
-      );
+      expect(schedule.map((e) => e.vocab.id).toList(), [
+        'a',
+        'b',
+        'a',
+        'b',
+        'a',
+      ]);
     });
   });
 

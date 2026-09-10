@@ -7,14 +7,14 @@ void main() {
   final shownAt = DateTime.utc(2026, 2, 1, 18, 0);
 
   Vocab buildVocab() => Vocab(
-        id: 'v1',
-        deckId: 'd1',
-        term: 'la biblioteca',
-        translation: 'die Bibliothek',
-        sourceLanguage: 'es',
-        targetLanguage: 'de',
-        createdAt: createdAt,
-      );
+    id: 'v1',
+    deckId: 'd1',
+    term: 'la biblioteca',
+    translation: 'die Bibliothek',
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    createdAt: createdAt,
+  );
 
   group('Vocab construction', () {
     test('defaults timesShown to zero for a freshly created entry', () {
@@ -36,9 +36,12 @@ void main() {
       expect(renamed, isNot(equals(buildVocab())));
     });
 
-    test('gives equal entries the same hashCode so they deduplicate in a Set', () {
-      expect({buildVocab(), buildVocab()}, hasLength(1));
-    });
+    test(
+      'gives equal entries the same hashCode so they deduplicate in a Set',
+      () {
+        expect({buildVocab(), buildVocab()}, hasLength(1));
+      },
+    );
   });
 
   group('Vocab.copyWith', () {
@@ -62,7 +65,10 @@ void main() {
 
   group('Vocab serialization', () {
     test('round-trips every field through toMap and fromMap', () {
-      final original = buildVocab().copyWith(lastShownAt: shownAt, timesShown: 7);
+      final original = buildVocab().copyWith(
+        lastShownAt: shownAt,
+        timesShown: 7,
+      );
 
       expect(Vocab.fromMap(original.toMap()), equals(original));
     });
@@ -73,11 +79,14 @@ void main() {
       expect(Vocab.fromMap(original.toMap()).lastShownAt, isNull);
     });
 
-    test('stores timestamps as UTC milliseconds so the map is database-ready', () {
-      final map = buildVocab().toMap();
+    test(
+      'stores timestamps as UTC milliseconds so the map is database-ready',
+      () {
+        final map = buildVocab().toMap();
 
-      expect(map['createdAt'], createdAt.millisecondsSinceEpoch);
-      expect(map['lastShownAt'], isNull);
-    });
+        expect(map['createdAt'], createdAt.millisecondsSinceEpoch);
+        expect(map['lastShownAt'], isNull);
+      },
+    );
   });
 }

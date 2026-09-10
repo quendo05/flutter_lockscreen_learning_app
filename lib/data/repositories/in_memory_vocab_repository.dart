@@ -16,10 +16,9 @@ class InMemoryVocabRepository implements VocabRepository {
 
   @override
   Future<List<Vocab>> getByDeck(String deckId) async {
-    final entries = _entriesById.values
-        .where((entry) => entry.deckId == deckId)
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final entries =
+        _entriesById.values.where((entry) => entry.deckId == deckId).toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return entries;
   }
 

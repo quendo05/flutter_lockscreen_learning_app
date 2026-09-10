@@ -26,20 +26,23 @@ class NextUpCard extends StatelessWidget {
         children: [
           Text(
             'On your lock screen',
-            style: theme.textTheme.labelLarge
-                ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
           ),
           const SizedBox(height: 12),
           Text(
             vocab.term,
-            style: theme.textTheme.headlineSmall
-                ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             vocab.translation,
-            style: theme.textTheme.bodyLarge
-                ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+            ),
           ),
           if (followingAt != null) ...[
             const SizedBox(height: 16),
@@ -54,8 +57,9 @@ class NextUpCard extends StatelessWidget {
                 Text(
                   // TimeOfDay respects the device's 12/24-hour preference.
                   'Changes at ${TimeOfDay.fromDateTime(followingAt!).format(context)}',
-                  style: theme.textTheme.bodySmall
-                      ?.copyWith(color: theme.colorScheme.onPrimaryContainer),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                  ),
                 ),
               ],
             ),

@@ -35,7 +35,9 @@ class _AddVocabSheetState extends State<AddVocabSheet> {
     super.initState();
     _termController.addListener(_onChanged);
     _translationController.addListener(_onChanged);
-    _termFocus.addListener(() => _onFocusLost(_termFocus, () => _termVisited = true));
+    _termFocus.addListener(
+      () => _onFocusLost(_termFocus, () => _termVisited = true),
+    );
     _translationFocus.addListener(
       () => _onFocusLost(_translationFocus, () => _translationVisited = true),
     );

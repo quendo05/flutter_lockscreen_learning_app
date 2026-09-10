@@ -27,14 +27,14 @@ void main() {
       Deck(id: id, name: name, createdAt: DateTime.utc(2026, 1, 1));
 
   Vocab vocab(String id, String deckId) => Vocab(
-        id: id,
-        deckId: deckId,
-        term: 'term-$id',
-        translation: 'translation-$id',
-        sourceLanguage: 'es',
-        targetLanguage: 'de',
-        createdAt: DateTime.utc(2026, 1, 1),
-      );
+    id: id,
+    deckId: deckId,
+    term: 'term-$id',
+    translation: 'translation-$id',
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
 
   Future<void> pumpScreen(
     WidgetTester tester, {
@@ -77,8 +77,7 @@ void main() {
   });
 
   group('with decks', () {
-    testWidgets('lists each deck with how many terms it holds',
-        (tester) async {
+    testWidgets('lists each deck with how many terms it holds', (tester) async {
       await pumpScreen(
         tester,
         deckRepository: InMemoryDeckRepository(
@@ -92,8 +91,9 @@ void main() {
       expect(find.textContaining('2 terms'), findsOneWidget);
     });
 
-    testWidgets('uses the singular for a deck holding one term',
-        (tester) async {
+    testWidgets('uses the singular for a deck holding one term', (
+      tester,
+    ) async {
       await pumpScreen(
         tester,
         deckRepository: InMemoryDeckRepository(
@@ -106,8 +106,9 @@ void main() {
       expect(find.textContaining('1 term'), findsOneWidget);
     });
 
-    testWidgets('says in words which deck is on the lock screen',
-        (tester) async {
+    testWidgets('says in words which deck is on the lock screen', (
+      tester,
+    ) async {
       await pumpScreen(
         tester,
         deckRepository: InMemoryDeckRepository(
@@ -149,10 +150,7 @@ void main() {
       await tester.tap(find.byTooltip('Use Other for your lock screen'));
       await tester.pumpAndSettle();
 
-      expect(
-        find.byTooltip('Other is on your lock screen'),
-        findsOneWidget,
-      );
+      expect(find.byTooltip('Other is on your lock screen'), findsOneWidget);
     });
   });
 
@@ -171,8 +169,9 @@ void main() {
     expect(find.text('No decks yet'), findsNothing);
   });
 
-  testWidgets('keeps Create unavailable until the name has content',
-      (tester) async {
+  testWidgets('keeps Create unavailable until the name has content', (
+    tester,
+  ) async {
     await pumpScreen(tester);
     await tester.pumpAndSettle();
 

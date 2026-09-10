@@ -68,10 +68,8 @@ class _AppShellState extends State<AppShell> {
   Future<void> _openDeck(Deck deck) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => DeckVocabPage(
-          deck: deck,
-          vocabRepository: widget.vocabRepository,
-        ),
+        builder: (_) =>
+            DeckVocabPage(deck: deck, vocabRepository: widget.vocabRepository),
       ),
     );
     await _deckListViewModel.load();
@@ -85,13 +83,13 @@ class _AppShellState extends State<AppShell> {
       // cost of scroll position — a fair trade for two short screens.
       body: switch (_selectedIndex) {
         _decksIndex => DeckListScreen(
-            viewModel: _deckListViewModel,
-            onOpenDeck: _openDeck,
-          ),
+          viewModel: _deckListViewModel,
+          onOpenDeck: _openDeck,
+        ),
         _ => HomeScreen(
-            viewModel: _homeViewModel,
-            onBrowseVocabulary: () => _select(_decksIndex),
-          ),
+          viewModel: _homeViewModel,
+          onBrowseVocabulary: () => _select(_decksIndex),
+        ),
       },
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,

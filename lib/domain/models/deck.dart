@@ -12,41 +12,34 @@ const defaultDeckName = 'My vocabulary';
 /// property of the deck, so it lives in the settings repository. That keeps two
 /// decks from ever both claiming to be active.
 class Deck {
-  const Deck({
-    required this.id,
-    required this.name,
-    required this.createdAt,
-  });
+  const Deck({required this.id, required this.name, required this.createdAt});
 
   /// The deck a fresh install starts with, and the one the v1 -> v2 migration
   /// files pre-existing terms under.
   ///
   /// Built here so the seed cannot drift between the schema, the web build
   /// and the tests, which each need to produce the same deck.
-  factory Deck.initial({required DateTime createdAt}) => Deck(
-        id: defaultDeckId,
-        name: defaultDeckName,
-        createdAt: createdAt,
-      );
+  factory Deck.initial({required DateTime createdAt}) =>
+      Deck(id: defaultDeckId, name: defaultDeckName, createdAt: createdAt);
 
   final String id;
   final String name;
   final DateTime createdAt;
 
   Map<String, Object?> toMap() => {
-        'id': id,
-        'name': name,
-        'createdAt': createdAt.millisecondsSinceEpoch,
-      };
+    'id': id,
+    'name': name,
+    'createdAt': createdAt.millisecondsSinceEpoch,
+  };
 
   factory Deck.fromMap(Map<String, Object?> map) => Deck(
-        id: map['id']! as String,
-        name: map['name']! as String,
-        createdAt: DateTime.fromMillisecondsSinceEpoch(
-          map['createdAt']! as int,
-          isUtc: true,
-        ),
-      );
+    id: map['id']! as String,
+    name: map['name']! as String,
+    createdAt: DateTime.fromMillisecondsSinceEpoch(
+      map['createdAt']! as int,
+      isUtc: true,
+    ),
+  );
 
   @override
   bool operator ==(Object other) =>

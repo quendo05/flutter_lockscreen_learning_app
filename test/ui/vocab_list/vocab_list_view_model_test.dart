@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
 import 'package:lockscreen_learning_app/ui/vocab_list/view_models/vocab_list_view_model.dart';
+
 import '../../support/vocab_repository_doubles.dart';
 
 void main() {
@@ -115,7 +116,10 @@ void main() {
     test('trims surrounding whitespace from what the user typed', () async {
       final viewModel = buildViewModel(InMemoryVocabRepository());
 
-      await viewModel.addVocab(term: '  la casa  ', translation: '  das Haus  ');
+      await viewModel.addVocab(
+        term: '  la casa  ',
+        translation: '  das Haus  ',
+      );
 
       expect(viewModel.vocabs.single.term, 'la casa');
       expect(viewModel.vocabs.single.translation, 'das Haus');

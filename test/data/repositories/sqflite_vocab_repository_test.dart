@@ -39,15 +39,13 @@ void main() {
       final path = p.join(tempDir.path, 'vocab.db');
 
       final first = await AppDatabase.open(path);
-      await SqfliteVocabRepository(first).save(
-        contractVocab('a').copyWith(timesShown: 2),
-      );
+      await SqfliteVocabRepository(first)
+          .save(contractVocab('a').copyWith(timesShown: 2));
       await first.close();
 
       final second = await AppDatabase.open(path);
-      final reloaded = await SqfliteVocabRepository(
-        second,
-      ).getByDeck(contractDeckId);
+      final reloaded = await SqfliteVocabRepository(second)
+          .getByDeck(contractDeckId);
       await second.close();
 
       expect(reloaded.single.id, 'a');
@@ -102,9 +100,8 @@ void main() {
       /// reading that deck back is what proves they survived reachable.
       Future<List<Vocab>> migratedDefaultDeck(String path) async {
         final database = await AppDatabase.open(path);
-        final entries = await SqfliteVocabRepository(
-          database,
-        ).getByDeck(defaultDeckId);
+        final entries = await SqfliteVocabRepository(database)
+            .getByDeck(defaultDeckId);
         await database.close();
         return entries;
       }

@@ -5,6 +5,7 @@ import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart'
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/vocab_list/view_models/vocab_list_view_model.dart';
 import 'package:lockscreen_learning_app/ui/vocab_list/widgets/vocab_list_screen.dart';
+
 import '../../support/vocab_repository_doubles.dart';
 
 void main() {
@@ -25,25 +26,27 @@ void main() {
   }
 
   Vocab vocab(String id, String term, String translation) => Vocab(
-        id: id,
-        deckId: 'd1',
-        term: term,
-        translation: translation,
-        sourceLanguage: 'es',
-        targetLanguage: 'de',
-        createdAt: DateTime.utc(2026, 1, 1),
-      );
+    id: id,
+    deckId: 'd1',
+    term: term,
+    translation: translation,
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
 
-  testWidgets('shows a progress indicator while entries are loading',
-      (tester) async {
+  testWidgets('shows a progress indicator while entries are loading', (
+    tester,
+  ) async {
     await pumpScreen(tester, HangingVocabRepository());
     await tester.pump();
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('invites the user to add a term when nothing is stored',
-      (tester) async {
+  testWidgets('invites the user to add a term when nothing is stored', (
+    tester,
+  ) async {
     await pumpScreen(tester, InMemoryVocabRepository());
     await tester.pumpAndSettle();
 
@@ -70,8 +73,9 @@ void main() {
     expect(find.text('Try again'), findsOneWidget);
   });
 
-  testWidgets('adds a term through the form and shows it in the list',
-      (tester) async {
+  testWidgets('adds a term through the form and shows it in the list', (
+    tester,
+  ) async {
     await pumpScreen(tester, InMemoryVocabRepository());
     await tester.pumpAndSettle();
 
@@ -106,8 +110,9 @@ void main() {
     expect(find.text('No vocabulary yet'), findsOneWidget);
   });
 
-  testWidgets('leaves Save unavailable while the form is still blank',
-      (tester) async {
+  testWidgets('leaves Save unavailable while the form is still blank', (
+    tester,
+  ) async {
     await pumpScreen(
       tester,
       InMemoryVocabRepository(

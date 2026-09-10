@@ -8,6 +8,7 @@ import 'package:lockscreen_learning_app/domain/models/deck.dart';
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/home/view_models/home_view_model.dart';
 import 'package:lockscreen_learning_app/ui/home/widgets/home_screen.dart';
+
 import '../../support/vocab_repository_doubles.dart';
 
 void main() {
@@ -16,14 +17,14 @@ void main() {
   setUp(() => browseTaps = 0);
 
   Vocab vocab(String id, String term, String translation) => Vocab(
-        id: id,
-        deckId: 'd1',
-        term: term,
-        translation: translation,
-        sourceLanguage: 'es',
-        targetLanguage: 'de',
-        createdAt: DateTime.utc(2026, 1, 1),
-      );
+    id: id,
+    deckId: 'd1',
+    term: term,
+    translation: translation,
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
 
   Future<void> pumpHome(WidgetTester tester, VocabRepository repository) {
     return tester.pumpWidget(
@@ -78,8 +79,9 @@ void main() {
   });
 
   group('with vocabulary saved', () {
-    testWidgets('shows the term that is up next with its translation',
-        (tester) async {
+    testWidgets('shows the term that is up next with its translation', (
+      tester,
+    ) async {
       await pumpHome(
         tester,
         InMemoryVocabRepository(
@@ -110,9 +112,7 @@ void main() {
     testWidgets('uses the singular for a lone term', (tester) async {
       await pumpHome(
         tester,
-        InMemoryVocabRepository(
-          initialEntries: [vocab('a', 'uno', 'eins')],
-        ),
+        InMemoryVocabRepository(initialEntries: [vocab('a', 'uno', 'eins')]),
       );
       await tester.pumpAndSettle();
 

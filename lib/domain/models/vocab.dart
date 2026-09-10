@@ -116,16 +116,16 @@ class Vocab {
 
   @override
   int get hashCode => Object.hash(
-        id,
-        deckId,
-        term,
-        translation,
-        sourceLanguage,
-        targetLanguage,
-        createdAt,
-        lastShownAt,
-        timesShown,
-      );
+    id,
+    deckId,
+    term,
+    translation,
+    sourceLanguage,
+    targetLanguage,
+    createdAt,
+    lastShownAt,
+    timesShown,
+  );
 
   @override
   String toString() => 'Vocab($id, $term → $translation)';

@@ -37,8 +37,9 @@ void main() {
     expect(find.text('Decks'), findsOneWidget);
   });
 
-  testWidgets('shows the deck list when its destination is chosen',
-      (tester) async {
+  testWidgets('shows the deck list when its destination is chosen', (
+    tester,
+  ) async {
     await pumpShell(tester);
     await tester.pumpAndSettle();
 
@@ -61,8 +62,9 @@ void main() {
     expect(find.text('LockScreenVocab'), findsOneWidget);
   });
 
-  testWidgets('sends the empty-state action through to the deck list',
-      (tester) async {
+  testWidgets('sends the empty-state action through to the deck list', (
+    tester,
+  ) async {
     await pumpShell(tester);
     await tester.pumpAndSettle();
 
@@ -85,8 +87,9 @@ void main() {
     expect(find.text('No vocabulary yet'), findsOneWidget);
   });
 
-  testWidgets('reflects a term added inside a deck on the home screen',
-      (tester) async {
+  testWidgets('reflects a term added inside a deck on the home screen', (
+    tester,
+  ) async {
     await pumpShell(tester);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Decks'));

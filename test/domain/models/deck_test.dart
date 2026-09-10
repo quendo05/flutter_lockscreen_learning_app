@@ -4,11 +4,8 @@ import 'package:lockscreen_learning_app/domain/models/deck.dart';
 void main() {
   final createdAt = DateTime.utc(2026, 3, 2, 14);
 
-  Deck buildDeck() => Deck(
-        id: 'd1',
-        name: 'Spanish basics',
-        createdAt: createdAt,
-      );
+  Deck buildDeck() =>
+      Deck(id: 'd1', name: 'Spanish basics', createdAt: createdAt);
 
   group('Deck equality', () {
     test('treats two decks with identical field values as equal', () {
@@ -21,9 +18,12 @@ void main() {
       expect(renamed, isNot(equals(buildDeck())));
     });
 
-    test('gives equal decks the same hashCode so they deduplicate in a Set', () {
-      expect({buildDeck(), buildDeck()}, hasLength(1));
-    });
+    test(
+      'gives equal decks the same hashCode so they deduplicate in a Set',
+      () {
+        expect({buildDeck(), buildDeck()}, hasLength(1));
+      },
+    );
   });
 
   group('Deck.initial', () {
@@ -43,8 +43,14 @@ void main() {
       expect(Deck.fromMap(original.toMap()), equals(original));
     });
 
-    test('stores createdAt as UTC milliseconds so the map is database-ready', () {
-      expect(buildDeck().toMap()['createdAt'], createdAt.millisecondsSinceEpoch);
-    });
+    test(
+      'stores createdAt as UTC milliseconds so the map is database-ready',
+      () {
+        expect(
+          buildDeck().toMap()['createdAt'],
+          createdAt.millisecondsSinceEpoch,
+        );
+      },
+    );
   });
 }

@@ -35,8 +35,9 @@ void main() {
       expect(saveEnabled(tester), isFalse);
     });
 
-    testWidgets('stays disabled when only the term is filled in',
-        (tester) async {
+    testWidgets('stays disabled when only the term is filled in', (
+      tester,
+    ) async {
       await pumpSheet(tester);
 
       await tester.enterText(find.byKey(const Key('term-field')), 'el libro');
@@ -45,8 +46,9 @@ void main() {
       expect(saveEnabled(tester), isFalse);
     });
 
-    testWidgets('stays disabled when only the translation is filled in',
-        (tester) async {
+    testWidgets('stays disabled when only the translation is filled in', (
+      tester,
+    ) async {
       await pumpSheet(tester);
 
       await tester.enterText(
@@ -58,8 +60,9 @@ void main() {
       expect(saveEnabled(tester), isFalse);
     });
 
-    testWidgets('becomes enabled once both fields have content',
-        (tester) async {
+    testWidgets('becomes enabled once both fields have content', (
+      tester,
+    ) async {
       await pumpSheet(tester);
 
       await tester.enterText(find.byKey(const Key('term-field')), 'el libro');
@@ -85,8 +88,9 @@ void main() {
       expect(saveEnabled(tester), isFalse);
     });
 
-    testWidgets('goes back to disabled when a field is cleared again',
-        (tester) async {
+    testWidgets('goes back to disabled when a field is cleared again', (
+      tester,
+    ) async {
       await pumpSheet(tester);
 
       await tester.enterText(find.byKey(const Key('term-field')), 'el libro');
@@ -103,16 +107,18 @@ void main() {
   });
 
   group('inline feedback', () {
-    testWidgets('says nothing before the user has visited a field',
-        (tester) async {
+    testWidgets('says nothing before the user has visited a field', (
+      tester,
+    ) async {
       await pumpSheet(tester);
 
       expect(errorOn(tester, 'term-field'), isNull);
       expect(errorOn(tester, 'translation-field'), isNull);
     });
 
-    testWidgets('flags the term once it is left behind still empty',
-        (tester) async {
+    testWidgets('flags the term once it is left behind still empty', (
+      tester,
+    ) async {
       await pumpSheet(tester);
 
       // The term field is autofocused; moving to the translation field leaves
@@ -123,8 +129,9 @@ void main() {
       expect(errorOn(tester, 'term-field'), 'Required');
     });
 
-    testWidgets('withdraws the term warning as soon as the term is filled',
-        (tester) async {
+    testWidgets('withdraws the term warning as soon as the term is filled', (
+      tester,
+    ) async {
       await pumpSheet(tester);
       await tester.tap(find.byKey(const Key('translation-field')));
       await tester.pumpAndSettle();
@@ -135,8 +142,9 @@ void main() {
       expect(errorOn(tester, 'term-field'), isNull);
     });
 
-    testWidgets('flags each field independently once both were visited',
-        (tester) async {
+    testWidgets('flags each field independently once both were visited', (
+      tester,
+    ) async {
       await pumpSheet(tester);
 
       // Focus moves term -> translation -> term, so both have been left empty.

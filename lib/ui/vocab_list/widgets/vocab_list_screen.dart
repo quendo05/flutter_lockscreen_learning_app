@@ -103,7 +103,8 @@ class _VocabListBody extends StatelessWidget {
       return const MessageState(
         icon: Icons.menu_book_outlined,
         title: 'No vocabulary yet',
-        message: 'Add your first term and it will start appearing on your '
+        message:
+            'Add your first term and it will start appearing on your '
             'lock screen.',
       );
     }

@@ -7,9 +7,12 @@ void main() {
   setUp(() => repository = InMemorySettingsRepository());
 
   group('displayInterval', () {
-    test('defaults to three hours before the user has chosen anything', () async {
-      expect(await repository.getDisplayInterval(), const Duration(hours: 3));
-    });
+    test(
+      'defaults to three hours before the user has chosen anything',
+      () async {
+        expect(await repository.getDisplayInterval(), const Duration(hours: 3));
+      },
+    );
 
     test('returns the interval that was last set', () async {
       await repository.setDisplayInterval(const Duration(hours: 6));
@@ -25,12 +28,15 @@ void main() {
       expect(await custom.getDisplayInterval(), const Duration(hours: 12));
     });
 
-    test('rejects a zero interval, which would schedule infinite reminders', () {
-      expect(
-        () => repository.setDisplayInterval(Duration.zero),
-        throwsArgumentError,
-      );
-    });
+    test(
+      'rejects a zero interval, which would schedule infinite reminders',
+      () {
+        expect(
+          () => repository.setDisplayInterval(Duration.zero),
+          throwsArgumentError,
+        );
+      },
+    );
 
     test('rejects a negative interval', () {
       expect(
@@ -39,14 +45,17 @@ void main() {
       );
     });
 
-    test('leaves the stored interval unchanged after a rejected value', () async {
-      try {
-        await repository.setDisplayInterval(Duration.zero);
-      } on ArgumentError {
-        // Expected — we only care about the state afterwards.
-      }
+    test(
+      'leaves the stored interval unchanged after a rejected value',
+      () async {
+        try {
+          await repository.setDisplayInterval(Duration.zero);
+        } on ArgumentError {
+          // Expected — we only care about the state afterwards.
+        }
 
-      expect(await repository.getDisplayInterval(), const Duration(hours: 3));
-    });
+        expect(await repository.getDisplayInterval(), const Duration(hours: 3));
+      },
+    );
   });
 }

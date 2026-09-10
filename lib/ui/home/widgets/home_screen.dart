@@ -125,19 +125,18 @@ class _CollectionSummary extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           '$count ${count == 1 ? 'term' : 'terms'} saved',
-          style: theme.textTheme.bodyMedium
-              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
         Text(
           'A new one every $hours ${hours == 1 ? 'hour' : 'hours'}',
-          style: theme.textTheme.bodyMedium
-              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 12),
-        OutlinedButton(
-          onPressed: onBrowse,
-          child: const Text('Manage decks'),
-        ),
+        OutlinedButton(onPressed: onBrowse, child: const Text('Manage decks')),
       ],
     );
   }

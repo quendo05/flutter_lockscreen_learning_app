@@ -6,40 +6,38 @@ import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart'
 import 'package:lockscreen_learning_app/domain/models/deck.dart';
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/home/view_models/home_view_model.dart';
+
 import '../../support/vocab_repository_doubles.dart';
 
 void main() {
   final now = DateTime.utc(2026, 7, 1, 9);
 
   Vocab vocab(String id, {DateTime? lastShownAt, int timesShown = 0}) => Vocab(
-        id: id,
-        deckId: 'd1',
-        term: 'term-$id',
-        translation: 'translation-$id',
-        sourceLanguage: 'es',
-        targetLanguage: 'de',
-        createdAt: DateTime.utc(2026, 1, 1),
-        lastShownAt: lastShownAt,
-        timesShown: timesShown,
-      );
+    id: id,
+    deckId: 'd1',
+    term: 'term-$id',
+    translation: 'translation-$id',
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    createdAt: DateTime.utc(2026, 1, 1),
+    lastShownAt: lastShownAt,
+    timesShown: timesShown,
+  );
 
   HomeViewModel buildViewModel({
     VocabRepository? vocabRepository,
     Duration interval = const Duration(hours: 3),
-  }) =>
-      HomeViewModel(
-        vocabRepository: vocabRepository ?? InMemoryVocabRepository(),
-        deckRepository: InMemoryDeckRepository(
-          initialDecks: [
-            Deck(id: 'd1', name: 'Spanish basics', createdAt: now),
-          ],
-        ),
-        settingsRepository: InMemorySettingsRepository(
-          initialInterval: interval,
-          initialActiveDeckId: 'd1',
-        ),
-        clock: () => now,
-      );
+  }) => HomeViewModel(
+    vocabRepository: vocabRepository ?? InMemoryVocabRepository(),
+    deckRepository: InMemoryDeckRepository(
+      initialDecks: [Deck(id: 'd1', name: 'Spanish basics', createdAt: now)],
+    ),
+    settingsRepository: InMemorySettingsRepository(
+      initialInterval: interval,
+      initialActiveDeckId: 'd1',
+    ),
+    clock: () => now,
+  );
 
   group('with no vocabulary saved', () {
     test('reports an empty collection rather than an error', () async {
@@ -86,7 +84,11 @@ void main() {
 
     test('announces the term most in need of practice', () async {
       final viewModel = await loadedWith([
-        vocab('practised', lastShownAt: DateTime.utc(2026, 6, 30), timesShown: 5),
+        vocab(
+          'practised',
+          lastShownAt: DateTime.utc(2026, 6, 30),
+          timesShown: 5,
+        ),
         vocab('untouched'),
       ]);
 
@@ -148,14 +150,16 @@ void main() {
   });
 
   group('the active deck', () {
-    test('is named, so the summary can say which collection it describes',
-        () async {
-      final viewModel = buildViewModel();
+    test(
+      'is named, so the summary can say which collection it describes',
+      () async {
+        final viewModel = buildViewModel();
 
-      await viewModel.load();
+        await viewModel.load();
 
-      expect(viewModel.activeDeckName, 'Spanish basics');
-    });
+        expect(viewModel.activeDeckName, 'Spanish basics');
+      },
+    );
 
     test('is the only deck whose terms reach the lock screen', () async {
       final viewModel = buildViewModel(

@@ -10,8 +10,8 @@ class InMemorySettingsRepository implements SettingsRepository {
   InMemorySettingsRepository({
     Duration initialInterval = defaultDisplayInterval,
     String initialActiveDeckId = defaultDeckId,
-  })  : _displayInterval = initialInterval,
-        _activeDeckId = initialActiveDeckId;
+  }) : _displayInterval = initialInterval,
+       _activeDeckId = initialActiveDeckId;
 
   Duration _displayInterval;
   String _activeDeckId;

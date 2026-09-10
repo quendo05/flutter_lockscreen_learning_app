@@ -3,10 +3,10 @@ import 'package:lockscreen_learning_app/data/repositories/deck_repository.dart';
 import 'package:lockscreen_learning_app/domain/models/deck.dart';
 
 Deck contractDeck(String id, {String? name, DateTime? createdAt}) => Deck(
-      id: id,
-      name: name ?? 'deck-$id',
-      createdAt: createdAt ?? DateTime.utc(2026, 1, 1),
-    );
+  id: id,
+  name: name ?? 'deck-$id',
+  createdAt: createdAt ?? DateTime.utc(2026, 1, 1),
+);
 
 /// The behaviour every [DeckRepository] implementation must satisfy.
 void runDeckRepositoryContract(Future<DeckRepository> Function() create) {
@@ -31,14 +31,16 @@ void runDeckRepositoryContract(Future<DeckRepository> Function() create) {
       expect(ids, ['first', 'second', 'third']);
     });
 
-    test('returns a copy, so mutating the result cannot corrupt the store',
-        () async {
-      await repository.save(contractDeck('a'));
+    test(
+      'returns a copy, so mutating the result cannot corrupt the store',
+      () async {
+        await repository.save(contractDeck('a'));
 
-      (await repository.getAll()).clear();
+        (await repository.getAll()).clear();
 
-      expect(await repository.getAll(), hasLength(1));
-    });
+        expect(await repository.getAll(), hasLength(1));
+      },
+    );
 
     test('preserves every field through a save and read cycle', () async {
       final deck = contractDeck('a', name: 'Spanish basics');

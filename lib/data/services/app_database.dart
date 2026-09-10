@@ -16,11 +16,11 @@ class AppDatabase {
   static const schemaVersion = 2;
 
   static Future<Database> open(String path) => openDatabase(
-        path,
-        version: schemaVersion,
-        onCreate: _create,
-        onUpgrade: _upgrade,
-      );
+    path,
+    version: schemaVersion,
+    onCreate: _create,
+    onUpgrade: _upgrade,
+  );
 
   /// A throwaway database that lives only in memory. Used by tests.
   ///
@@ -81,10 +81,10 @@ class AppDatabase {
 
   /// Every install has at least one deck, so there is always somewhere to save.
   static Future<void> _insertDefaultDeck(Database db) => db.insert(
-        decksTable,
-        Deck.initial(createdAt: DateTime.now().toUtc()).toMap(),
-        conflictAlgorithm: ConflictAlgorithm.ignore,
-      );
+    decksTable,
+    Deck.initial(createdAt: DateTime.now().toUtc()).toMap(),
+    conflictAlgorithm: ConflictAlgorithm.ignore,
+  );
 
   static Future<void> _createVocabIndexes(Database db) async {
     // Matches the ordering the scheduler asks for, so picking the next terms
