@@ -6,6 +6,7 @@
 class Vocab {
   const Vocab({
     required this.id,
+    required this.deckId,
     required this.term,
     required this.translation,
     required this.sourceLanguage,
@@ -16,6 +17,10 @@ class Vocab {
   });
 
   final String id;
+
+  /// The deck this term belongs to. Every term lives in exactly one deck.
+  final String deckId;
+
   final String term;
   final String translation;
 
@@ -36,6 +41,7 @@ class Vocab {
   /// nothing needs to clear it yet, so the simpler signature wins.
   Vocab copyWith({
     String? id,
+    String? deckId,
     String? term,
     String? translation,
     String? sourceLanguage,
@@ -46,6 +52,7 @@ class Vocab {
   }) {
     return Vocab(
       id: id ?? this.id,
+      deckId: deckId ?? this.deckId,
       term: term ?? this.term,
       translation: translation ?? this.translation,
       sourceLanguage: sourceLanguage ?? this.sourceLanguage,
@@ -61,6 +68,7 @@ class Vocab {
   Map<String, Object?> toMap() {
     return {
       'id': id,
+      'deckId': deckId,
       'term': term,
       'translation': translation,
       'sourceLanguage': sourceLanguage,
@@ -76,6 +84,7 @@ class Vocab {
 
     return Vocab(
       id: map['id']! as String,
+      deckId: map['deckId']! as String,
       term: map['term']! as String,
       translation: map['translation']! as String,
       sourceLanguage: map['sourceLanguage']! as String,
@@ -95,6 +104,7 @@ class Vocab {
   bool operator ==(Object other) {
     return other is Vocab &&
         other.id == id &&
+        other.deckId == deckId &&
         other.term == term &&
         other.translation == translation &&
         other.sourceLanguage == sourceLanguage &&
@@ -107,6 +117,7 @@ class Vocab {
   @override
   int get hashCode => Object.hash(
         id,
+        deckId,
         term,
         translation,
         sourceLanguage,

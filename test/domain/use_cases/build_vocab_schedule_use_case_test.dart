@@ -14,6 +14,7 @@ void main() {
   }) =>
       Vocab(
         id: id,
+        deckId: 'd1',
         term: 'term-$id',
         translation: 'translation-$id',
         sourceLanguage: 'es',

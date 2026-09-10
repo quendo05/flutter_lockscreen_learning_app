@@ -10,6 +10,9 @@ abstract class VocabRepository {
   /// All stored entries, newest first.
   Future<List<Vocab>> getAll();
 
+  /// The entries belonging to [deckId], newest first.
+  Future<List<Vocab>> getByDeck(String deckId);
+
   /// The entry with [id], or null if nothing is stored under that id.
   Future<Vocab?> getById(String id);
 

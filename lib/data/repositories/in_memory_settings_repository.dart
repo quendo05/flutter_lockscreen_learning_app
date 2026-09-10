@@ -1,3 +1,4 @@
+import '../../domain/models/deck.dart';
 import 'settings_repository.dart';
 
 /// Default cadence: a new term every three hours.
@@ -10,9 +11,12 @@ const kDefaultDisplayInterval = Duration(hours: 3);
 class InMemorySettingsRepository implements SettingsRepository {
   InMemorySettingsRepository({
     Duration initialInterval = kDefaultDisplayInterval,
-  }) : _displayInterval = initialInterval;
+    String initialActiveDeckId = defaultDeckId,
+  })  : _displayInterval = initialInterval,
+        _activeDeckId = initialActiveDeckId;
 
   Duration _displayInterval;
+  String _activeDeckId;
 
   @override
   Future<Duration> getDisplayInterval() async => _displayInterval;
@@ -27,5 +31,16 @@ class InMemorySettingsRepository implements SettingsRepository {
       );
     }
     _displayInterval = interval;
+  }
+
+  @override
+  Future<String> getActiveDeckId() async => _activeDeckId;
+
+  @override
+  Future<void> setActiveDeckId(String deckId) async {
+    if (deckId.isEmpty) {
+      throw ArgumentError.value(deckId, 'deckId', 'Must not be empty.');
+    }
+    _activeDeckId = deckId;
   }
 }

@@ -2,8 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 
-Vocab contractVocab(String id, {DateTime? createdAt}) => Vocab(
+Vocab contractVocab(String id, {DateTime? createdAt, String deckId = 'd1'}) =>
+    Vocab(
       id: id,
+      deckId: deckId,
       term: 'term-$id',
       translation: 'translation-$id',
       sourceLanguage: 'es',
@@ -57,6 +59,41 @@ void runVocabRepositoryContract(Future<VocabRepository> Function() create) {
       await repository.save(contractVocab('a'));
 
       expect((await repository.getAll()).single.lastShownAt, isNull);
+    });
+  });
+
+  group('getByDeck', () {
+    test('returns only the terms belonging to that deck', () async {
+      await repository.save(contractVocab('a', deckId: 'spanish'));
+      await repository.save(contractVocab('b', deckId: 'french'));
+      await repository.save(contractVocab('c', deckId: 'spanish'));
+
+      final ids = (await repository.getByDeck('spanish')).map((v) => v.id);
+
+      expect(ids, unorderedEquals(['a', 'c']));
+    });
+
+    test('returns those terms newest first', () async {
+      await repository.save(contractVocab(
+        'old',
+        deckId: 'spanish',
+        createdAt: DateTime.utc(2026, 1, 1),
+      ));
+      await repository.save(contractVocab(
+        'new',
+        deckId: 'spanish',
+        createdAt: DateTime.utc(2026, 5, 1),
+      ));
+
+      final ids = (await repository.getByDeck('spanish')).map((v) => v.id);
+
+      expect(ids, ['new', 'old']);
+    });
+
+    test('is empty for a deck holding nothing', () async {
+      await repository.save(contractVocab('a', deckId: 'spanish'));
+
+      expect(await repository.getByDeck('french'), isEmpty);
     });
   });
 

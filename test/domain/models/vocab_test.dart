@@ -8,6 +8,7 @@ void main() {
 
   Vocab buildVocab() => Vocab(
         id: 'v1',
+        deckId: 'd1',
         term: 'la biblioteca',
         translation: 'die Bibliothek',
         sourceLanguage: 'es',

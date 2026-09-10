@@ -5,4 +5,10 @@ abstract class SettingsRepository {
 
   /// Stores [interval]. Throws [ArgumentError] if it is not positive.
   Future<void> setDisplayInterval(Duration interval);
+
+  /// The deck currently feeding the lock screen.
+  Future<String> getActiveDeckId();
+
+  /// Chooses which deck feeds the lock screen.
+  Future<void> setActiveDeckId(String deckId);
 }
