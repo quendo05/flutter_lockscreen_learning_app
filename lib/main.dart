@@ -3,16 +3,25 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart' show getDatabasesPath;
 
+import 'config/app_info.dart';
+import 'data/repositories/in_memory_settings_repository.dart';
 import 'data/repositories/in_memory_vocab_repository.dart';
+import 'data/repositories/settings_repository.dart';
 import 'data/repositories/sqflite_vocab_repository.dart';
 import 'data/repositories/vocab_repository.dart';
-import 'ui/vocab_list/view_models/vocab_list_view_model.dart';
-import 'ui/vocab_list/widgets/vocab_list_screen.dart';
+import 'ui/core/widgets/app_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(LockscreenLearningApp(vocabRepository: await openVocabRepository()));
+  runApp(
+    LockscreenLearningApp(
+      vocabRepository: await openVocabRepository(),
+      // The interval is not persisted yet, so it starts at the default of
+      // three hours on every launch.
+      settingsRepository: InMemorySettingsRepository(),
+    ),
+  );
 }
 
 /// Opens the store the app should use on this platform.
@@ -28,18 +37,25 @@ Future<VocabRepository> openVocabRepository() async {
 }
 
 class LockscreenLearningApp extends StatelessWidget {
-  const LockscreenLearningApp({required this.vocabRepository, super.key});
+  const LockscreenLearningApp({
+    required this.vocabRepository,
+    required this.settingsRepository,
+    super.key,
+  });
 
   final VocabRepository vocabRepository;
+  final SettingsRepository settingsRepository;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lockscreen Learning',
+      debugShowCheckedModeBanner: false,
+      title: appName,
       theme: _themeFor(Brightness.light),
       darkTheme: _themeFor(Brightness.dark),
-      home: VocabListScreen(
-        viewModel: VocabListViewModel(repository: vocabRepository),
+      home: AppShell(
+        vocabRepository: vocabRepository,
+        settingsRepository: settingsRepository,
       ),
     );
   }
