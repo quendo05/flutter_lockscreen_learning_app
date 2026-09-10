@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart' show getDatabasesPath;
@@ -69,8 +69,8 @@ class LockscreenLearningApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: appName,
-      theme: _themeFor(Brightness.light),
-      darkTheme: _themeFor(Brightness.dark),
+      theme: themeFor(Brightness.light),
+      darkTheme: themeFor(Brightness.dark),
       home: AppShell(
         vocabRepository: vocabRepository,
         deckRepository: deckRepository,
@@ -79,13 +79,38 @@ class LockscreenLearningApp extends StatelessWidget {
     );
   }
 
-  static ThemeData _themeFor(Brightness brightness) {
-    return ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        // Deliberately not the default indigo — a muted green reads as calm
-        // study material rather than as a generic template app.
-        seedColor: const Color(0xFF3A6B5C),
-        brightness: brightness,
+  /// Public so a test can assert the header stays distinct from the body.
+  @visibleForTesting
+  static ThemeData themeFor(Brightness brightness) {
+    final scheme = ColorScheme.fromSeed(
+      // Deliberately not the default indigo — a muted green reads as calm
+      // study material rather than as a generic template app.
+      seedColor: const Color(0xFF3A6B5C),
+      brightness: brightness,
+    );
+    final base = ThemeData(colorScheme: scheme);
+
+    return base.copyWith(
+      appBarTheme: AppBarTheme(
+        // A tonal shade drawn from the same seed, one step up from the page
+        // body. Material 3 defaults the app bar to `surface`, which is exactly
+        // the body colour, so the header dissolves into the content; this is
+        // what separates them. The navigation bar sits on the same container
+        // shade, so the two frame the content instead of competing with it.
+        backgroundColor: scheme.surfaceContainer,
+        foregroundColor: scheme.onSurface,
+        // The container shade already carries the tint; letting the elevation
+        // overlay add more would darken it a second time.
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        // A hairline instead of a shadow. Shadows under a header compete with
+        // the content for depth and cost more to render.
+        shape: Border(bottom: BorderSide(color: scheme.outlineVariant)),
+        titleTextStyle: base.textTheme.titleLarge?.copyWith(
+          color: scheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
