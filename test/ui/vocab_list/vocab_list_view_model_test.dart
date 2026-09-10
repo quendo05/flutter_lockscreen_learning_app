@@ -129,6 +129,17 @@ void main() {
       expect(viewModel.loadError, isNull);
     });
 
+    test('leaves already-saved entries alone when input is rejected', () async {
+      final viewModel = buildViewModel(InMemoryVocabRepository());
+      await viewModel.addVocab(term: 'la casa', translation: 'das Haus');
+
+      await viewModel.addVocab(term: '  ', translation: 'das Buch');
+
+      expect(viewModel.vocabs.single.term, 'la casa');
+      expect(viewModel.loadError, isNull);
+      expect(viewModel.validationMessage, isNotNull);
+    });
+
     test('refuses a blank translation', () async {
       final viewModel = buildViewModel(InMemoryVocabRepository());
 

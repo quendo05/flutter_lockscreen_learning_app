@@ -127,7 +127,7 @@ void main() {
     expect(find.text('No vocabulary yet'), findsOneWidget);
   });
 
-  testWidgets('keeps existing entries visible when the form is left blank',
+  testWidgets('leaves Save unavailable while the form is still blank',
       (tester) async {
     await pumpScreen(
       tester,
@@ -139,13 +139,12 @@ void main() {
 
     await tester.tap(find.byTooltip('Add vocabulary'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
 
-    // A validation slip must not look like a failed load: the saved list has
-    // to stay on screen.
-    expect(find.text('la casa'), findsOneWidget);
-    expect(find.text('Something went wrong'), findsNothing);
-    expect(find.text('Enter both a term and its translation.'), findsOneWidget);
+    // The saved list can no longer be endangered by an empty submit, because
+    // the submit is not reachable. AddVocabSheet's own tests cover the detail.
+    expect(
+      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
+      isNull,
+    );
   });
 }
