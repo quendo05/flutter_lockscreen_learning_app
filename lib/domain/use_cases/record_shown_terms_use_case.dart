@@ -9,9 +9,13 @@ import '../models/vocab.dart';
 /// passed did have its turn, because that queue is exactly what the lock
 /// screen was working through.
 ///
-/// Each entry is counted once because publishing replaces the queue: the queue
-/// written after this runs starts at the present moment, so the entries
-/// counted here are not in it to be counted again.
+/// Only slots that are completely over count. The term still on the lock
+/// screen is left alone until its turn ends, so that merely opening the app
+/// does not retire it early.
+///
+/// Each entry is counted once because publishing replaces the queue, and the
+/// queue written after this runs never reaches back past the slot already
+/// running.
 class RecordShownTermsUseCase {
   const RecordShownTermsUseCase();
 
@@ -25,15 +29,15 @@ class RecordShownTermsUseCase {
   }) {
     if (published == null) return const [];
 
-    final elapsed = published.elapsedBy(now);
-    if (elapsed.isEmpty) return const [];
+    final finished = published.finishedBy(now);
+    if (finished.isEmpty) return const [];
 
     final stored = {for (final vocab in vocabs) vocab.id: vocab};
     final marked = <String, Vocab>{};
 
     // In order, earliest first, so the last mark applied to a term is the one
     // that dates it.
-    for (final entry in elapsed) {
+    for (final entry in finished) {
       final current = marked[entry.vocabId] ?? stored[entry.vocabId];
 
       // A term deleted since the queue was published has no count to keep.

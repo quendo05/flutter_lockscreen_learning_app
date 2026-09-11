@@ -33,6 +33,7 @@ void main() {
     VocabRepository? vocabRepository,
     Duration interval = const Duration(hours: 3),
     ScheduleStore? scheduleStore,
+    DateTime? at,
   }) => HomeViewModel(
     scheduleStore: scheduleStore,
     vocabRepository: vocabRepository ?? InMemoryVocabRepository(),
@@ -49,7 +50,7 @@ void main() {
       ],
     ),
     settingsRepository: InMemorySettingsRepository(initialActiveDeckId: 'd1'),
-    clock: () => now,
+    clock: () => at ?? now,
   );
 
   group('with no vocabulary saved', () {
@@ -380,6 +381,76 @@ void main() {
       // Nothing the user could act on from here, and the vocabulary read fine.
       expect(viewModel.loadError, isNull);
       expect(viewModel.nextUp, isNotNull);
+    });
+  });
+
+  group('merely opening the app', () {
+    test('leaves the term on the lock screen where it was', () async {
+      final repository = InMemoryVocabRepository(
+        initialEntries: [vocab('a'), vocab('b'), vocab('c')],
+      );
+      final store = RecordingScheduleStore();
+
+      await buildViewModel(
+        vocabRepository: repository,
+        scheduleStore: store,
+        at: now,
+      ).load();
+      final firstRun = store.last.entries.first;
+
+      // Opened again an hour into a three hour slot, with nothing changed.
+      await buildViewModel(
+        vocabRepository: repository,
+        scheduleStore: store,
+        at: now.add(const Duration(hours: 1)),
+      ).load();
+
+      expect(store.last.entries.first, firstRun);
+    });
+
+    test('does not count the term still showing as done with', () async {
+      final repository = InMemoryVocabRepository(
+        initialEntries: [vocab('a'), vocab('b')],
+      );
+      final store = RecordingScheduleStore();
+
+      await buildViewModel(
+        vocabRepository: repository,
+        scheduleStore: store,
+        at: now,
+      ).load();
+      await buildViewModel(
+        vocabRepository: repository,
+        scheduleStore: store,
+        at: now.add(const Duration(hours: 1)),
+      ).load();
+
+      expect(
+        (await repository.getByDeck('d1')).every((v) => v.timesShown == 0),
+        isTrue,
+      );
+    });
+
+    test('keeps the later slots on their original boundaries', () async {
+      final store = RecordingScheduleStore();
+      final repository = InMemoryVocabRepository(
+        initialEntries: [vocab('a'), vocab('b')],
+      );
+
+      await buildViewModel(
+        vocabRepository: repository,
+        scheduleStore: store,
+        at: now,
+      ).load();
+      final firstRun = store.last.entries.take(3).toList();
+
+      await buildViewModel(
+        vocabRepository: repository,
+        scheduleStore: store,
+        at: now.add(const Duration(hours: 1)),
+      ).load();
+
+      expect(store.last.entries.take(3), firstRun);
     });
   });
 }

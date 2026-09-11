@@ -53,21 +53,23 @@ void main() {
     expect(updated, isEmpty);
   });
 
-  test('records nothing while the first entry is still showing', () {
+  test('records nothing while the first entry is still showing, however far '
+      'into its slot', () {
     final updated = recordShown(
       published: published(['a', 'b']),
       vocabs: [vocab('a'), vocab('b')],
-      now: nine,
+      // Two hours into a three hour slot: on screen, not yet done with.
+      now: nine.add(const Duration(hours: 2)),
     );
 
     expect(updated, isEmpty);
   });
 
-  test('marks a term whose turn has passed', () {
+  test('marks a term once its slot is over', () {
     final updated = recordShown(
       published: published(['a', 'b']),
       vocabs: [vocab('a'), vocab('b')],
-      now: nine.add(const Duration(hours: 1)),
+      now: nine.add(const Duration(hours: 4)),
     );
 
     expect(updated.single.id, 'a');
@@ -75,12 +77,12 @@ void main() {
     expect(updated.single.lastShownAt, nine);
   });
 
-  test('leaves terms whose turn has not come alone, so nothing is written '
-      'that did not happen', () {
+  test('leaves the term still showing alone, so nothing is written that did '
+      'not happen', () {
     final updated = recordShown(
       published: published(['a', 'b']),
       vocabs: [vocab('a'), vocab('b')],
-      now: nine.add(const Duration(hours: 1)),
+      now: nine.add(const Duration(hours: 4)),
     );
 
     expect(updated.map((v) => v.id), isNot(contains('b')));

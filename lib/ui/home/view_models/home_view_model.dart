@@ -72,10 +72,13 @@ class HomeViewModel extends LoadableViewModel {
     final activeDeckId = await _settingsRepository.getActiveDeckId();
     final activeDeck = await _deckRepository.getById(activeDeckId);
 
+    final previous = await _lastPublished();
+
     // Before anything is worked out: the terms on screen should reflect the
     // turns they have already had, not the state they were left in.
     final vocabs = await _recordWhatWasShown(
       await _vocabRepository.getByDeck(activeDeckId),
+      previous,
     );
     _activeDeckName = activeDeck?.name;
     // The pace belongs to the deck, so a patient deck and a brisk one can
@@ -88,11 +91,48 @@ class HomeViewModel extends LoadableViewModel {
     _upcoming = _buildSchedule(
       vocabs: vocabs,
       interval: _displayInterval,
-      from: _clock(),
+      from: _continueFrom(previous, activeDeck),
       count: vocabs.isEmpty ? 0 : publishedScheduleLength,
     );
 
     await _publish(activeDeck);
+  }
+
+  /// The queue published last, or null if there is none to be had.
+  ///
+  /// A store that cannot be read is treated as an empty one: the app would
+  /// otherwise refuse to start over a file it is about to replace anyway.
+  Future<PublishedSchedule?> _lastPublished() async {
+    final store = _scheduleStore;
+    if (store == null) return null;
+
+    try {
+      return await store.read();
+    } on Object catch (error) {
+      debugPrint('HomeViewModel: could not read the published queue: $error');
+      return null;
+    }
+  }
+
+  /// Where the rebuilt queue begins.
+  ///
+  /// Not simply now. Rebuilding from the present moment would restart the slot
+  /// already running every single time the app is opened, so a term would
+  /// never get its full turn and the rotation would jump forward on every
+  /// visit. Picking up at the start of the running slot instead leaves what is
+  /// showing showing, and keeps every later boundary where it already was.
+  ///
+  /// Starts afresh only when there is genuinely nothing to carry on from: no
+  /// previous queue, another deck, a changed pace, or a queue that ran out
+  /// while the app was away. Those are all changes the user made or waited
+  /// for, and each should take effect at once.
+  DateTime _continueFrom(PublishedSchedule? previous, Deck? deck) {
+    final now = _clock();
+    if (previous == null || deck == null) return now;
+    if (previous.deckId != deck.id) return now;
+    if (previous.interval != deck.displayInterval) return now;
+
+    return previous.currentAt(now)?.showAt ?? now;
   }
 
   /// Brings the practice counts up to date with the queue the lock screen
@@ -101,13 +141,13 @@ class HomeViewModel extends LoadableViewModel {
   /// A failure is logged and the terms are handed back untouched. The counts
   /// only influence what comes up next, so losing one round of them is a far
   /// smaller thing than refusing to show the screen over it.
-  Future<List<Vocab>> _recordWhatWasShown(List<Vocab> vocabs) async {
-    final store = _scheduleStore;
-    if (store == null) return vocabs;
-
+  Future<List<Vocab>> _recordWhatWasShown(
+    List<Vocab> vocabs,
+    PublishedSchedule? previous,
+  ) async {
     try {
       final shown = _recordShown(
-        published: await store.read(),
+        published: previous,
         vocabs: vocabs,
         now: _clock(),
       );

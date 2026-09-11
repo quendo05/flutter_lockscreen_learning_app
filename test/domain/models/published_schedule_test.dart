@@ -123,7 +123,7 @@ void main() {
     });
   });
 
-  group('elapsedBy', () {
+  group('reading the running slot back', () {
     PublishedSchedule threeEntries() => schedule(
       upcoming: [
         ScheduledVocab(showAt: nine, vocab: vocab('first')),
@@ -138,27 +138,63 @@ void main() {
       ],
     );
 
-    test('names the entries whose moment has passed', () {
-      final elapsed = threeEntries().elapsedBy(
-        nine.add(const Duration(hours: 4)),
-      );
+    group('currentAt', () {
+      test('names the entry whose slot is running', () {
+        final current = threeEntries().currentAt(
+          nine.add(const Duration(hours: 1)),
+        );
 
-      expect(elapsed.map((e) => e.vocabId), ['first', 'second']);
+        expect(current!.vocabId, 'first');
+      });
+
+      test('moves on the moment the next slot starts', () {
+        final current = threeEntries().currentAt(
+          nine.add(const Duration(hours: 3)),
+        );
+
+        expect(current!.vocabId, 'second');
+      });
+
+      test('reports nothing once the queue has run out, so a rebuild starts '
+          'afresh instead of in the past', () {
+        expect(
+          threeEntries().currentAt(nine.add(const Duration(days: 1))),
+          isNull,
+        );
+      });
+
+      test('reports nothing for a queue that has not started yet', () {
+        expect(
+          threeEntries().currentAt(nine.subtract(const Duration(hours: 1))),
+          isNull,
+        );
+      });
     });
 
-    test('leaves out the entry showing right now, which has not had its '
-        'turn yet', () {
-      final elapsed = threeEntries().elapsedBy(nine);
+    group('finishedBy', () {
+      test('leaves out the slot still running, which has not had its full '
+          'turn', () {
+        final finished = threeEntries().finishedBy(
+          nine.add(const Duration(hours: 1)),
+        );
 
-      expect(elapsed, isEmpty);
-    });
+        expect(finished, isEmpty);
+      });
 
-    test('names them all once the whole queue is behind us', () {
-      final elapsed = threeEntries().elapsedBy(
-        nine.add(const Duration(days: 1)),
-      );
+      test('counts a slot the moment the next one takes over', () {
+        final finished = threeEntries().finishedBy(
+          nine.add(const Duration(hours: 3)),
+        );
 
-      expect(elapsed, hasLength(3));
+        expect(finished.map((e) => e.vocabId), ['first']);
+      });
+
+      test('names them all once the whole queue is behind us', () {
+        expect(
+          threeEntries().finishedBy(nine.add(const Duration(days: 1))),
+          hasLength(3),
+        );
+      });
     });
   });
 }

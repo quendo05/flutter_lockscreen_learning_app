@@ -125,12 +125,31 @@ class PublishedSchedule {
   /// Ordered by [PublishedEntry.showAt], earliest first.
   final List<PublishedEntry> entries;
 
-  /// The entries whose moment has passed by [now].
+  /// The entry the lock screen is showing at [now], or null when the queue
+  /// does not cover that moment.
   ///
-  /// Strictly before, so the entry showing right now is not yet counted as
-  /// shown: it gets counted on the next run, by which time it really has been.
-  List<PublishedEntry> elapsedBy(DateTime now) =>
-      entries.where((entry) => entry.showAt.isBefore(now)).toList();
+  /// Null means there is nothing to carry on from: either the queue lies
+  /// wholly in the future, or it ran out while the app was away.
+  PublishedEntry? currentAt(DateTime now) {
+    for (final entry in entries.reversed) {
+      if (entry.showAt.isAfter(now)) continue;
+
+      // The last entry that has started. Whether it is still running decides
+      // whether the queue reaches [now] at all.
+      return now.isBefore(entry.showAt.add(interval)) ? entry : null;
+    }
+
+    return null;
+  }
+
+  /// The entries whose slot is completely over by [now].
+  ///
+  /// The entry still showing is deliberately not among them. It is having its
+  /// turn, not finished with it — counting it now would cut that turn short,
+  /// because a term counted as shown falls behind in the next queue.
+  List<PublishedEntry> finishedBy(DateTime now) => entries
+      .where((entry) => !entry.showAt.add(interval).isAfter(now))
+      .toList();
 
   Map<String, Object?> toJson() => {
     'schemaVersion': version,
