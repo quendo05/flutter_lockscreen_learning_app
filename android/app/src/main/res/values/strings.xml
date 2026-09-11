@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vocab_widget_label">LockScreenVocab</string>
+    <string name="vocab_widget_description">The term your lock screen is showing right now.</string>
+
+    <!-- Shown when no queue has been published yet, or the last one ran out
+         while the app was away. Not an error: the user can act on it, so it
+         says what to do rather than what went wrong. -->
+    <string name="vocab_widget_empty_term">No term due</string>
+    <string name="vocab_widget_empty_translation">Open the app to line some up</string>
+</resources>

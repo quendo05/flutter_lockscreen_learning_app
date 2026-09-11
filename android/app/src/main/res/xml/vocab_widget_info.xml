@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Attributes here are the ones every supported release understands.
+     `previewLayout`, `targetCellWidth` and `targetCellHeight` are API 31+; if
+     you want them, they go in a copy of this file under `res/xml-31/` rather
+     than here, or lint flags them on older devices. The lock screen opt-out
+     (`android:widgetCategory="not_keyguard"`) works the same way, in
+     `res/xml-36/` — not wanted here, since the lock screen is the point. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/vocab_widget_description"
+    android:initialLayout="@layout/vocab_widget"
+    android:minWidth="180dp"
+    android:minHeight="40dp"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:updatePeriodMillis="1800000" />

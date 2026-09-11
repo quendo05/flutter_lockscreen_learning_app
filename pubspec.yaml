@@ -36,6 +36,8 @@ dependencies:
   cupertino_icons: ^1.0.8
   sqflite: ^2.4.4
   path: ^1.9.1
+  # Resolves the directory the Android widget provider reads the queue from.
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

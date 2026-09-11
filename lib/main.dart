@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart' show getDatabasesPath;
 
 import 'config/app_info.dart';
@@ -16,7 +17,9 @@ import 'data/repositories/vocab_repository.dart';
 import 'data/services/app_database.dart';
 import 'data/services/demo_decks.dart';
 import 'data/services/file_schedule_store.dart';
+import 'data/services/notifying_schedule_store.dart';
 import 'data/services/schedule_store.dart';
+import 'data/services/widget_refresher.dart';
 import 'domain/models/deck.dart';
 import 'ui/core/widgets/app_shell.dart';
 
@@ -64,8 +67,8 @@ Future<LockscreenLearningApp> _buildApp() async {
     );
   }
 
-  final directory = await getDatabasesPath();
-  final database = await AppDatabase.open(p.join(directory, 'vocab.db'));
+  final databases = await getDatabasesPath();
+  final database = await AppDatabase.open(p.join(databases, 'vocab.db'));
   final vocabRepository = SqfliteVocabRepository(database);
   final deckRepository = SqfliteDeckRepository(database);
 
@@ -76,14 +79,21 @@ Future<LockscreenLearningApp> _buildApp() async {
     );
   }
 
+  // Not beside the database. The Android widget provider reads the queue from
+  // `Context.getFilesDir()`, which is what this maps to — leaving it in the
+  // databases directory would mean teaching the native side a second path for
+  // no gain. The iOS extension will need the App Group container instead,
+  // which is a change to this line and nothing else.
+  final support = await getApplicationSupportDirectory();
+
   return LockscreenLearningApp(
     vocabRepository: vocabRepository,
     deckRepository: deckRepository,
     settingsRepository: SqfliteSettingsRepository(database),
-    // Beside the database for now. The iOS widget extension will only be able
-    // to read this once it moves into the App Group container the extension
-    // shares, which is a change to this line and nothing else.
-    scheduleStore: FileScheduleStore(p.join(directory, 'schedule.json')),
+    scheduleStore: NotifyingScheduleStore(
+      store: FileScheduleStore(p.join(support.path, 'schedule.json')),
+      refresher: const PlatformWidgetRefresher(),
+    ),
   );
 }
 
