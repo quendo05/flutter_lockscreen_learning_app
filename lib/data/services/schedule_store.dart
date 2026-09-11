@@ -14,4 +14,12 @@ abstract class ScheduleStore {
   /// are expected to decide for themselves whether a failure is worth
   /// interrupting the user for.
   Future<void> write(PublishedSchedule schedule);
+
+  /// The queue published last, or null if there is none to be had.
+  ///
+  /// Null rather than a throw for an absent or unreadable queue: on a first
+  /// run there simply is none, and a payload this app cannot parse is no more
+  /// useful than an absent one. A caller catching up on what was shown should
+  /// treat both the same way.
+  Future<PublishedSchedule?> read();
 }

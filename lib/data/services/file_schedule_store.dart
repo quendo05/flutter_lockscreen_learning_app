@@ -25,4 +25,20 @@ class FileScheduleStore implements ScheduleStore {
     await staged.writeAsString(jsonEncode(schedule.toJson()), flush: true);
     await staged.rename(path);
   }
+
+  @override
+  Future<PublishedSchedule?> read() async {
+    final file = File(path);
+    if (!file.existsSync()) return null;
+
+    try {
+      final json = jsonDecode(await file.readAsString());
+      return PublishedSchedule.fromJson(json as Map<String, Object?>);
+    } on Object {
+      // Anything unreadable is treated as nothing published: a truncated or
+      // outdated file is about to be replaced by the next write anyway, and
+      // refusing to start over it would be worse than forgetting it.
+      return null;
+    }
+  }
 }

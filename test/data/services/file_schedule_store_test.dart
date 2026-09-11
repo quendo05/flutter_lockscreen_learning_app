@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/services/file_schedule_store.dart';
+import 'package:lockscreen_learning_app/domain/models/deck.dart';
 import 'package:lockscreen_learning_app/domain/models/published_schedule.dart';
 import 'package:lockscreen_learning_app/domain/models/scheduled_vocab.dart';
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
@@ -19,28 +20,32 @@ void main() {
     if (tempDir.existsSync()) await tempDir.delete(recursive: true);
   });
 
-  PublishedSchedule schedule({String term = 'el libro'}) => PublishedSchedule(
-    generatedAt: DateTime.utc(2026, 1, 1, 9),
-    deckId: 'd1',
-    deckName: 'Spanish basics',
-    sourceLanguage: 'es',
-    targetLanguage: 'de',
-    interval: const Duration(hours: 3),
-    entries: [
-      ScheduledVocab(
-        showAt: DateTime.utc(2026, 1, 1, 9),
-        vocab: Vocab(
-          id: 'v1',
-          deckId: 'd1',
-          term: term,
-          translation: 'das Buch',
+  PublishedSchedule schedule({String term = 'el libro'}) =>
+      PublishedSchedule.of(
+        generatedAt: DateTime.utc(2026, 1, 1, 9),
+        deck: Deck(
+          id: 'd1',
+          name: 'Spanish basics',
           sourceLanguage: 'es',
           targetLanguage: 'de',
+          displayInterval: const Duration(hours: 3),
           createdAt: DateTime.utc(2026, 1, 1),
         ),
-      ),
-    ],
-  );
+        upcoming: [
+          ScheduledVocab(
+            showAt: DateTime.utc(2026, 1, 1, 9),
+            vocab: Vocab(
+              id: 'v1',
+              deckId: 'd1',
+              term: term,
+              translation: 'das Buch',
+              sourceLanguage: 'es',
+              targetLanguage: 'de',
+              createdAt: DateTime.utc(2026, 1, 1),
+            ),
+          ),
+        ],
+      );
 
   String pathIn(Directory dir) => p.join(dir.path, 'schedule.json');
 
@@ -92,5 +97,31 @@ void main() {
         .where((name) => name != 'schedule.json');
 
     expect(leftovers, isEmpty);
+  });
+
+  group('reading back', () {
+    test('returns nothing before anything has been published', () async {
+      final store = FileScheduleStore(pathIn(tempDir));
+
+      expect(await store.read(), isNull);
+    });
+
+    test('returns the queue that was written', () async {
+      final store = FileScheduleStore(pathIn(tempDir));
+      await store.write(schedule(term: 'el libro'));
+
+      final restored = await store.read();
+
+      expect(restored!.deckName, 'Spanish basics');
+      expect(restored.entries.single.term, 'el libro');
+    });
+
+    test('treats an unreadable file as nothing published, so a truncated '
+        'write cannot stop the app starting', () async {
+      final path = pathIn(tempDir);
+      await File(path).writeAsString('{"schemaVersion": 1, "entri');
+
+      expect(await FileScheduleStore(path).read(), isNull);
+    });
   });
 }

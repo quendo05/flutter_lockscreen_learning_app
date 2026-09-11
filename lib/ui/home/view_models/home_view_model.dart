@@ -102,14 +102,10 @@ class HomeViewModel extends LoadableViewModel {
 
     try {
       await store.write(
-        PublishedSchedule(
+        PublishedSchedule.of(
           generatedAt: _clock(),
-          deckId: deck.id,
-          deckName: deck.name,
-          sourceLanguage: deck.sourceLanguage,
-          targetLanguage: deck.targetLanguage,
-          interval: deck.displayInterval,
-          entries: _upcoming,
+          deck: deck,
+          upcoming: _upcoming,
         ),
       );
     } on Object catch (error) {
