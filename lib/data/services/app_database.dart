@@ -12,9 +12,15 @@ class AppDatabase {
 
   static const decksTable = 'decks';
   static const vocabsTable = 'vocabs';
+  static const settingsTable = 'settings';
+
+  /// The only row [settingsTable] ever holds. What it stores belongs to
+  /// the install rather than to a user, so a second row would mean
+  /// nothing; the CHECK constraint makes that structural.
+  static const settingsRowId = 1;
 
   /// Bump this and add an [_upgrade] branch whenever the schema changes.
-  static const schemaVersion = 3;
+  static const schemaVersion = 4;
 
   static Future<Database> open(String path) => openDatabase(
     path,
@@ -51,6 +57,7 @@ class AppDatabase {
     ''');
 
     await _createVocabIndexes(db);
+    await _createSettingsTable(db);
   }
 
   /// Version 1 had a single flat table of terms and no notion of decks.
@@ -107,6 +114,37 @@ class AppDatabase {
           NOT NULL DEFAULT ${defaultDisplayInterval.inMinutes}
       ''');
     }
+
+    if (from < 4) {
+      // Which deck feeds the lock screen was previously forgotten on every
+      // launch. Seeded with the deck the app fell back to anyway, so an
+      // upgraded install carries on pointing where it already pointed.
+      await db.execute('''
+        CREATE TABLE $settingsTable (
+          id INTEGER PRIMARY KEY CHECK (id = $settingsRowId),
+          activeDeckId TEXT NOT NULL
+        )
+      ''');
+      await db.insert(settingsTable, {
+        'id': settingsRowId,
+        'activeDeckId': defaultDeckId,
+      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+  }
+
+  /// The settings row, seeded on creation so a read never has to cope with
+  /// its absence and every write is an update of something that exists.
+  static Future<void> _createSettingsTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE $settingsTable (
+        id INTEGER PRIMARY KEY CHECK (id = $settingsRowId),
+        activeDeckId TEXT NOT NULL
+      )
+    ''');
+    await db.insert(settingsTable, {
+      'id': settingsRowId,
+      'activeDeckId': defaultDeckId,
+    }, conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
   static Future<void> _createDecksTable(Database db) => db.execute('''

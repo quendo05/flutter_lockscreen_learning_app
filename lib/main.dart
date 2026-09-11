@@ -10,6 +10,7 @@ import 'data/repositories/in_memory_settings_repository.dart';
 import 'data/repositories/in_memory_vocab_repository.dart';
 import 'data/repositories/settings_repository.dart';
 import 'data/repositories/sqflite_deck_repository.dart';
+import 'data/repositories/sqflite_settings_repository.dart';
 import 'data/repositories/sqflite_vocab_repository.dart';
 import 'data/repositories/vocab_repository.dart';
 import 'data/services/app_database.dart';
@@ -46,9 +47,7 @@ Future<LockscreenLearningApp> _buildApp() async {
   return LockscreenLearningApp(
     vocabRepository: SqfliteVocabRepository(database),
     deckRepository: SqfliteDeckRepository(database),
-    // The interval and the active deck are not persisted yet, so they start at
-    // their defaults on every launch.
-    settingsRepository: InMemorySettingsRepository(),
+    settingsRepository: SqfliteSettingsRepository(database),
   );
 }
 
