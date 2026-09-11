@@ -6,6 +6,8 @@ import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_reposi
 import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
 import 'package:lockscreen_learning_app/data/services/schedule_store.dart';
 import 'package:lockscreen_learning_app/domain/models/deck.dart';
+import 'package:lockscreen_learning_app/domain/models/published_schedule.dart';
+import 'package:lockscreen_learning_app/domain/models/scheduled_vocab.dart';
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/home/view_models/home_view_model.dart';
 
@@ -264,5 +266,120 @@ void main() {
         expect(viewModel.nextUp, isNotNull);
       },
     );
+  });
+
+  group('catching up on what the lock screen showed', () {
+    final deck = Deck(
+      id: 'd1',
+      name: 'Spanish basics',
+      sourceLanguage: 'es',
+      targetLanguage: 'de',
+      displayInterval: const Duration(hours: 3),
+      createdAt: now,
+    );
+
+    /// A queue published six hours ago, whose first two slots are behind us.
+    PublishedSchedule alreadyRun(List<String> ids) => PublishedSchedule.of(
+      generatedAt: now.subtract(const Duration(hours: 6)),
+      deck: deck,
+      upcoming: [
+        for (var i = 0; i < ids.length; i++)
+          ScheduledVocab(
+            showAt: now.subtract(Duration(hours: 6 - i * 3)),
+            vocab: vocab(ids[i]),
+          ),
+      ],
+    );
+
+    test('counts the turns taken while the app was closed', () async {
+      final repository = InMemoryVocabRepository(
+        initialEntries: [vocab('a'), vocab('b')],
+      );
+      final viewModel = buildViewModel(
+        vocabRepository: repository,
+        scheduleStore: RecordingScheduleStore(previous: alreadyRun(['a', 'b'])),
+      );
+
+      await viewModel.load();
+
+      final stored = {
+        for (final v in await repository.getByDeck('d1')) v.id: v,
+      };
+
+      expect(stored['a']!.timesShown, 1);
+      expect(stored['a']!.lastShownAt, now.subtract(const Duration(hours: 6)));
+      expect(stored['b']!.timesShown, 1);
+    });
+
+    test('lets what was just shown fall behind in the next queue', () async {
+      final viewModel = buildViewModel(
+        vocabRepository: InMemoryVocabRepository(
+          initialEntries: [vocab('a'), vocab('b')],
+        ),
+        scheduleStore: RecordingScheduleStore(previous: alreadyRun(['a'])),
+      );
+
+      await viewModel.load();
+
+      // 'a' had its turn, 'b' never has, so 'b' goes first now.
+      expect(viewModel.nextUp!.vocab.id, 'b');
+    });
+
+    test(
+      'counts a turn once, however often the app is opened afterwards',
+      () async {
+        final repository = InMemoryVocabRepository(
+          initialEntries: [vocab('a'), vocab('b')],
+        );
+        final viewModel = buildViewModel(
+          vocabRepository: repository,
+          scheduleStore: RecordingScheduleStore(
+            previous: alreadyRun(['a', 'b']),
+          ),
+        );
+
+        await viewModel.load();
+        // The queue published by the first load starts now, so none of its
+        // entries have had their turn — this is what stops a second count.
+        await viewModel.load();
+
+        final stored = {
+          for (final v in await repository.getByDeck('d1')) v.id: v,
+        };
+
+        expect(stored['a']!.timesShown, 1);
+        expect(stored['b']!.timesShown, 1);
+      },
+    );
+
+    test(
+      'counts nothing on a first run, when no queue was ever published',
+      () async {
+        final repository = InMemoryVocabRepository(
+          initialEntries: [vocab('a')],
+        );
+        final viewModel = buildViewModel(
+          vocabRepository: repository,
+          scheduleStore: RecordingScheduleStore(),
+        );
+
+        await viewModel.load();
+
+        expect((await repository.getByDeck('d1')).single.timesShown, 0);
+      },
+    );
+
+    test('leaves the screen readable when the counts cannot be written', () async {
+      final viewModel = buildViewModel(
+        vocabRepository: FailingOnSaveVocabRepository([vocab('a')]),
+        scheduleStore: RecordingScheduleStore(previous: alreadyRun(['a'])),
+      );
+
+      await viewModel.load();
+
+      // Nothing the user could act on from here, and the vocabulary read fine.
+      expect(viewModel.loadError, isNull);
+      expect(viewModel.nextUp, isNotNull);
+    });
   });
 }

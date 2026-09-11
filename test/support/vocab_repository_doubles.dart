@@ -33,3 +33,27 @@ class HangingVocabRepository implements VocabRepository {
   @override
   Future<void> delete(String id) async {}
 }
+
+/// A repository that reads fine but refuses every write.
+///
+/// Separates a failed write from a failed read, which the app treats very
+/// differently: a read failure blanks the screen, a write failure must not.
+class FailingOnSaveVocabRepository implements VocabRepository {
+  FailingOnSaveVocabRepository(this._entries);
+
+  final List<Vocab> _entries;
+
+  @override
+  Future<List<Vocab>> getByDeck(String deckId) async =>
+      _entries.where((vocab) => vocab.deckId == deckId).toList();
+
+  @override
+  Future<Vocab?> getById(String id) async =>
+      _entries.where((vocab) => vocab.id == id).firstOrNull;
+
+  @override
+  Future<void> save(Vocab vocab) async => throw Exception('read-only');
+
+  @override
+  Future<void> delete(String id) async => throw Exception('read-only');
+}

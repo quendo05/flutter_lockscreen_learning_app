@@ -63,6 +63,14 @@ class Vocab {
     );
   }
 
+  /// Records that this term reached the lock screen at [at].
+  ///
+  /// Counts one appearance, not one session: a term that came up three times
+  /// while the app was closed is marked three times, because that is what the
+  /// scheduler orders by.
+  Vocab markShown(DateTime at) =>
+      copyWith(lastShownAt: at, timesShown: timesShown + 1);
+
   /// Timestamps become UTC epoch milliseconds so the map drops straight into
   /// a database row or the shared store the native widgets read.
   Map<String, Object?> toMap() {

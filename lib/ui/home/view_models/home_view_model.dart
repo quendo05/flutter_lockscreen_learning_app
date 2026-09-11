@@ -8,7 +8,9 @@ import '../../../data/services/schedule_store.dart';
 import '../../../domain/models/deck.dart';
 import '../../../domain/models/published_schedule.dart';
 import '../../../domain/models/scheduled_vocab.dart';
+import '../../../domain/models/vocab.dart';
 import '../../../domain/use_cases/build_vocab_schedule_use_case.dart';
+import '../../../domain/use_cases/record_shown_terms_use_case.dart';
 import '../../../utils/clock.dart';
 import '../../core/view_models/loadable_view_model.dart';
 
@@ -20,6 +22,7 @@ class HomeViewModel extends LoadableViewModel {
     required this._deckRepository,
     required this._settingsRepository,
     this._buildSchedule = const BuildVocabScheduleUseCase(),
+    this._recordShown = const RecordShownTermsUseCase(),
     this._scheduleStore,
     Clock? clock,
   }) : _clock = clock ?? DateTime.now;
@@ -28,6 +31,7 @@ class HomeViewModel extends LoadableViewModel {
   final DeckRepository _deckRepository;
   final SettingsRepository _settingsRepository;
   final BuildVocabScheduleUseCase _buildSchedule;
+  final RecordShownTermsUseCase _recordShown;
 
   /// Where the queue is left for the lock screen. Null where there is no
   /// native side to read it, which is the web build and most tests.
@@ -66,9 +70,13 @@ class HomeViewModel extends LoadableViewModel {
   Future<void> readContent() async {
     // Only the active deck reaches the lock screen, so only it belongs here.
     final activeDeckId = await _settingsRepository.getActiveDeckId();
-    final vocabs = await _vocabRepository.getByDeck(activeDeckId);
-
     final activeDeck = await _deckRepository.getById(activeDeckId);
+
+    // Before anything is worked out: the terms on screen should reflect the
+    // turns they have already had, not the state they were left in.
+    final vocabs = await _recordWhatWasShown(
+      await _vocabRepository.getByDeck(activeDeckId),
+    );
     _activeDeckName = activeDeck?.name;
     // The pace belongs to the deck, so a patient deck and a brisk one can
     // coexist instead of sharing one global setting.
@@ -85,6 +93,38 @@ class HomeViewModel extends LoadableViewModel {
     );
 
     await _publish(activeDeck);
+  }
+
+  /// Brings the practice counts up to date with the queue the lock screen
+  /// has been working through, and returns the terms as they now stand.
+  ///
+  /// A failure is logged and the terms are handed back untouched. The counts
+  /// only influence what comes up next, so losing one round of them is a far
+  /// smaller thing than refusing to show the screen over it.
+  Future<List<Vocab>> _recordWhatWasShown(List<Vocab> vocabs) async {
+    final store = _scheduleStore;
+    if (store == null) return vocabs;
+
+    try {
+      final shown = _recordShown(
+        published: await store.read(),
+        vocabs: vocabs,
+        now: _clock(),
+      );
+      if (shown.isEmpty) return vocabs;
+
+      for (final vocab in shown) {
+        await _vocabRepository.save(vocab);
+      }
+
+      // Swapped in rather than re-read: the store was just told about these,
+      // so another query would only ask it to repeat itself.
+      final marked = {for (final vocab in shown) vocab.id: vocab};
+      return [for (final vocab in vocabs) marked[vocab.id] ?? vocab];
+    } on Object catch (error) {
+      debugPrint('HomeViewModel: could not record what was shown: $error');
+      return vocabs;
+    }
   }
 
   /// Leaves the queue where the lock screen will find it.
