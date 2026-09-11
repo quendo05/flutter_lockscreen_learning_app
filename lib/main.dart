@@ -14,6 +14,7 @@ import 'data/repositories/sqflite_settings_repository.dart';
 import 'data/repositories/sqflite_vocab_repository.dart';
 import 'data/repositories/vocab_repository.dart';
 import 'data/services/app_database.dart';
+import 'data/services/demo_decks.dart';
 import 'data/services/file_schedule_store.dart';
 import 'data/services/schedule_store.dart';
 import 'domain/models/deck.dart';
@@ -30,25 +31,54 @@ Future<void> main() async {
 /// sqflite has no web implementation. The browser build exists only for quick
 /// UI iteration, so there it falls back to stores that do not persist rather
 /// than failing to start.
+/// Whether to write the demo decks on start:
+///
+/// ```sh
+/// flutter run --dart-define=SEED_DEMO_DECKS=true
+/// ```
+///
+/// A compile-time constant, so a normal build drops the seeding and the demo
+/// words with it rather than shipping them and skipping over them.
+const _seedDemo = bool.fromEnvironment('SEED_DEMO_DECKS');
+
 Future<LockscreenLearningApp> _buildApp() async {
   if (kIsWeb) {
+    final vocabRepository = InMemoryVocabRepository();
+    // On device the schema seeds this deck; in memory nothing does, so the
+    // app would otherwise start with nowhere to save.
+    final deckRepository = InMemoryDeckRepository(
+      initialDecks: [Deck.initial(createdAt: DateTime.now().toUtc())],
+    );
+
+    if (_seedDemo) {
+      await seedDemoDecks(
+        deckRepository: deckRepository,
+        vocabRepository: vocabRepository,
+      );
+    }
+
     return LockscreenLearningApp(
-      vocabRepository: InMemoryVocabRepository(),
-      // On device the schema seeds this deck; in memory nothing does, so the
-      // app would otherwise start with nowhere to save.
-      deckRepository: InMemoryDeckRepository(
-        initialDecks: [Deck.initial(createdAt: DateTime.now().toUtc())],
-      ),
+      vocabRepository: vocabRepository,
+      deckRepository: deckRepository,
       settingsRepository: InMemorySettingsRepository(),
     );
   }
 
   final directory = await getDatabasesPath();
   final database = await AppDatabase.open(p.join(directory, 'vocab.db'));
+  final vocabRepository = SqfliteVocabRepository(database);
+  final deckRepository = SqfliteDeckRepository(database);
+
+  if (_seedDemo) {
+    await seedDemoDecks(
+      deckRepository: deckRepository,
+      vocabRepository: vocabRepository,
+    );
+  }
 
   return LockscreenLearningApp(
-    vocabRepository: SqfliteVocabRepository(database),
-    deckRepository: SqfliteDeckRepository(database),
+    vocabRepository: vocabRepository,
+    deckRepository: deckRepository,
     settingsRepository: SqfliteSettingsRepository(database),
     // Beside the database for now. The iOS widget extension will only be able
     // to read this once it moves into the App Group container the extension
