@@ -6,19 +6,46 @@ import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_reposi
 import 'package:lockscreen_learning_app/domain/models/deck.dart';
 import 'package:lockscreen_learning_app/ui/core/widgets/app_shell.dart';
 
+import '../../support/schedule_store_doubles.dart';
+
 void main() {
   Deck seededDeck() => Deck.initial(createdAt: DateTime.utc(2026, 1, 1));
 
-  Future<void> pumpShell(WidgetTester tester) {
+  Future<void> pumpShell(WidgetTester tester, {RecordingScheduleStore? store}) {
     return tester.pumpWidget(
       MaterialApp(
         home: AppShell(
           vocabRepository: InMemoryVocabRepository(),
           deckRepository: InMemoryDeckRepository(initialDecks: [seededDeck()]),
           settingsRepository: InMemorySettingsRepository(),
+          scheduleStore: store,
         ),
       ),
     );
+  }
+
+  /// Drives the app all the way to the background and back, the way the
+  /// platform does it.
+  Future<void> sendToBackground(WidgetTester tester) async {
+    for (final state in const [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+    ]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> bringToForeground(WidgetTester tester) async {
+    for (final state in const [
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+    await tester.pumpAndSettle();
   }
 
   testWidgets('opens on the home screen', (tester) async {
@@ -139,5 +166,45 @@ void main() {
     // Back on the list, which has reloaded to show the new name.
     expect(find.text('Spanish basics'), findsOneWidget);
     expect(find.text(defaultDeckName), findsNothing);
+  });
+
+  group('keeping the lock screen in step with the app', () {
+    testWidgets('publishes again on the way to the background, which is the '
+        'moment the queue starts being needed', (tester) async {
+      final store = RecordingScheduleStore();
+      await pumpShell(tester, store: store);
+      await tester.pumpAndSettle();
+      final onOpen = store.published.length;
+
+      await sendToBackground(tester);
+
+      expect(store.published.length, greaterThan(onOpen));
+    });
+
+    testWidgets('publishes again on coming back, so turns taken while away '
+        'are accounted for', (tester) async {
+      final store = RecordingScheduleStore();
+      await pumpShell(tester, store: store);
+      await tester.pumpAndSettle();
+      await sendToBackground(tester);
+      final onLeaving = store.published.length;
+
+      await bringToForeground(tester);
+
+      expect(store.published.length, greaterThan(onLeaving));
+    });
+
+    testWidgets('still works when nothing native reads the queue', (
+      tester,
+    ) async {
+      await pumpShell(tester);
+      await tester.pumpAndSettle();
+
+      await sendToBackground(tester);
+
+      // The web build passes no store at all; going to the background must
+      // not be the thing that breaks it.
+      expect(tester.takeException(), isNull);
+    });
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../data/repositories/deck_repository.dart';
@@ -45,6 +47,10 @@ class _AppShellState extends State<AppShell> {
   late final HomeViewModel _homeViewModel;
   late final DeckListViewModel _deckListViewModel;
 
+  /// Watches the app leave and come back, which is what keeps the published
+  /// queue in step with a lock screen the app cannot see.
+  late final AppLifecycleListener _lifecycle;
+
   int _selectedIndex = _homeIndex;
 
   @override
@@ -61,10 +67,29 @@ class _AppShellState extends State<AppShell> {
       vocabRepository: widget.vocabRepository,
       settingsRepository: widget.settingsRepository,
     );
+    _lifecycle = AppLifecycleListener(
+      // Leaving is the moment the queue starts being needed: from here on the
+      // lock screen works through it alone, so it should be as fresh as the
+      // app can make it.
+      onPause: _refreshLockScreenQueue,
+      // Coming back is the moment to find out what happened while away. The
+      // home screen only reloads itself when it is rebuilt, which a warm
+      // resume does not do.
+      onResume: _refreshLockScreenQueue,
+    );
   }
+
+  /// Rebuilds and republishes the queue, recording the turns taken since it
+  /// was last worked out.
+  ///
+  /// Deliberately the same path the home screen takes rather than a publish on
+  /// its own: a queue that still starts where the last one did would hand the
+  /// lock screen entries whose moment has already passed.
+  void _refreshLockScreenQueue() => unawaited(_homeViewModel.load());
 
   @override
   void dispose() {
+    _lifecycle.dispose();
     _homeViewModel.dispose();
     _deckListViewModel.dispose();
     super.dispose();
