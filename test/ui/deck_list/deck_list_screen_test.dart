@@ -20,8 +20,12 @@ class _FailingDeckRepository implements DeckRepository {
 
 void main() {
   final opened = <String>[];
+  final settingsOpened = <String>[];
 
-  setUp(opened.clear);
+  setUp(() {
+    opened.clear();
+    settingsOpened.clear();
+  });
 
   Deck deck(String id, String name) => Deck(
     id: id,
@@ -61,6 +65,7 @@ void main() {
             idGenerator: () => 'new-${++counter}',
           ),
           onOpenDeck: (deck) => opened.add(deck.id),
+          onOpenDeckSettings: (deck) => settingsOpened.add(deck.id),
         ),
       ),
     );
@@ -141,6 +146,26 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(opened, ['a']);
+    });
+
+    testWidgets('opens the settings for a deck without opening the deck', (
+      tester,
+    ) async {
+      await pumpScreen(
+        tester,
+        deckRepository: InMemoryDeckRepository(
+          initialDecks: [deck('a', 'Spanish basics')],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Settings for Spanish basics'));
+      await tester.pumpAndSettle();
+
+      expect(settingsOpened, ['a']);
+      // The row's own tap target is unaffected: the shortcut goes straight to
+      // the settings rather than through the deck.
+      expect(opened, isEmpty);
     });
 
     testWidgets('moves the lock screen to another deck', (tester) async {

@@ -76,7 +76,7 @@ class _DeckVocabPageState extends State<DeckVocabPage> {
       viewModel: _viewModel,
       actions: [
         IconButton(
-          icon: const Icon(Icons.tune),
+          icon: const Icon(Icons.settings_outlined),
           tooltip: 'Deck settings',
           onPressed: _openSettings,
         ),

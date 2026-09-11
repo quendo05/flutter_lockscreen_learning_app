@@ -117,4 +117,27 @@ void main() {
     expect(find.text('el libro'), findsOneWidget);
     expect(find.text('1 term saved'), findsOneWidget);
   });
+
+  testWidgets('renames a deck from the deck list, without opening it', (
+    tester,
+  ) async {
+    await pumpShell(tester);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Decks'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Settings for $defaultDeckName'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('deck-name-field')),
+      'Spanish basics',
+    );
+    await tester.pump();
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    // Back on the list, which has reloaded to show the new name.
+    expect(find.text('Spanish basics'), findsOneWidget);
+    expect(find.text(defaultDeckName), findsNothing);
+  });
 }

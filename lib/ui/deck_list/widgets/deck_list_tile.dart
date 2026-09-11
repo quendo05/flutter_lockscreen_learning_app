@@ -10,6 +10,7 @@ class DeckListTile extends StatelessWidget {
     required this.termCount,
     required this.isActive,
     required this.onOpen,
+    required this.onOpenSettings,
     required this.onActivate,
     super.key,
   });
@@ -18,6 +19,11 @@ class DeckListTile extends StatelessWidget {
   final int termCount;
   final bool isActive;
   final VoidCallback onOpen;
+
+  /// Opens this deck's settings directly, so changing a deck's pace or
+  /// pair does not mean opening its vocabulary first.
+  final VoidCallback onOpenSettings;
+
   final VoidCallback onActivate;
 
   @override
@@ -34,6 +40,13 @@ class DeckListTile extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            // Named after the deck, because several of these sit in one
+            // list and a bare 'Settings' would not say which.
+            tooltip: 'Settings for ${deck.name}',
+            onPressed: onOpenSettings,
+          ),
           IconButton(
             icon: Icon(
               isActive ? Icons.check_circle : Icons.circle_outlined,

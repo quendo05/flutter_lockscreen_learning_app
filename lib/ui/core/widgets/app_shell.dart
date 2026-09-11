@@ -6,6 +6,8 @@ import '../../../data/repositories/vocab_repository.dart';
 import '../../../domain/models/deck.dart';
 import '../../deck_list/view_models/deck_list_view_model.dart';
 import '../../deck_list/widgets/deck_list_screen.dart';
+import '../../deck_settings/view_models/deck_settings_view_model.dart';
+import '../../deck_settings/widgets/deck_settings_screen.dart';
 import '../../home/view_models/home_view_model.dart';
 import '../../home/widgets/home_screen.dart';
 import '../../vocab_list/widgets/deck_vocab_page.dart';
@@ -78,6 +80,22 @@ class _AppShellState extends State<AppShell> {
     await _deckListViewModel.load();
   }
 
+  /// Opens a deck's settings straight from the list, then reloads it so a
+  /// renamed deck shows its new name without the user having to open it.
+  Future<void> _openDeckSettings(Deck deck) async {
+    await Navigator.of(context).push<Deck>(
+      MaterialPageRoute<Deck>(
+        builder: (_) => DeckSettingsScreen(
+          viewModel: DeckSettingsViewModel(
+            deck: deck,
+            repository: widget.deckRepository,
+          ),
+        ),
+      ),
+    );
+    await _deckListViewModel.load();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,6 +106,7 @@ class _AppShellState extends State<AppShell> {
         _decksIndex => DeckListScreen(
           viewModel: _deckListViewModel,
           onOpenDeck: _openDeck,
+          onOpenDeckSettings: _openDeckSettings,
         ),
         _ => HomeScreen(
           viewModel: _homeViewModel,

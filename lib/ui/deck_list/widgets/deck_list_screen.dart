@@ -12,6 +12,7 @@ class DeckListScreen extends StatefulWidget {
   const DeckListScreen({
     required this.viewModel,
     required this.onOpenDeck,
+    required this.onOpenDeckSettings,
     super.key,
   });
 
@@ -19,6 +20,9 @@ class DeckListScreen extends StatefulWidget {
 
   /// Opens a deck's vocabulary. Navigation belongs to the caller.
   final ValueChanged<Deck> onOpenDeck;
+
+  /// Opens a deck's settings, for the same reason and by the same route.
+  final ValueChanged<Deck> onOpenDeckSettings;
 
   @override
   State<DeckListScreen> createState() => _DeckListScreenState();
@@ -65,6 +69,7 @@ class _DeckListScreenState extends State<DeckListScreen> {
         builder: (context, _) => _DeckListBody(
           viewModel: widget.viewModel,
           onOpenDeck: widget.onOpenDeck,
+          onOpenDeckSettings: widget.onOpenDeckSettings,
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -77,10 +82,15 @@ class _DeckListScreenState extends State<DeckListScreen> {
 }
 
 class _DeckListBody extends StatelessWidget {
-  const _DeckListBody({required this.viewModel, required this.onOpenDeck});
+  const _DeckListBody({
+    required this.viewModel,
+    required this.onOpenDeck,
+    required this.onOpenDeckSettings,
+  });
 
   final DeckListViewModel viewModel;
   final ValueChanged<Deck> onOpenDeck;
+  final ValueChanged<Deck> onOpenDeckSettings;
 
   @override
   Widget build(BuildContext context) {
@@ -119,6 +129,7 @@ class _DeckListBody extends StatelessWidget {
           termCount: viewModel.termCountFor(deck.id),
           isActive: deck.id == viewModel.activeDeckId,
           onOpen: () => onOpenDeck(deck),
+          onOpenSettings: () => onOpenDeckSettings(deck),
           onActivate: () => viewModel.setActiveDeck(deck.id),
         );
       },
