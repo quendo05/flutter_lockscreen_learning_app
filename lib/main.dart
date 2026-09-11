@@ -14,6 +14,8 @@ import 'data/repositories/sqflite_settings_repository.dart';
 import 'data/repositories/sqflite_vocab_repository.dart';
 import 'data/repositories/vocab_repository.dart';
 import 'data/services/app_database.dart';
+import 'data/services/file_schedule_store.dart';
+import 'data/services/schedule_store.dart';
 import 'domain/models/deck.dart';
 import 'ui/core/widgets/app_shell.dart';
 
@@ -48,6 +50,10 @@ Future<LockscreenLearningApp> _buildApp() async {
     vocabRepository: SqfliteVocabRepository(database),
     deckRepository: SqfliteDeckRepository(database),
     settingsRepository: SqfliteSettingsRepository(database),
+    // Beside the database for now. The iOS widget extension will only be able
+    // to read this once it moves into the App Group container the extension
+    // shares, which is a change to this line and nothing else.
+    scheduleStore: FileScheduleStore(p.join(directory, 'schedule.json')),
   );
 }
 
@@ -56,12 +62,14 @@ class LockscreenLearningApp extends StatelessWidget {
     required this.vocabRepository,
     required this.deckRepository,
     required this.settingsRepository,
+    this.scheduleStore,
     super.key,
   });
 
   final VocabRepository vocabRepository;
   final DeckRepository deckRepository;
   final SettingsRepository settingsRepository;
+  final ScheduleStore? scheduleStore;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +82,7 @@ class LockscreenLearningApp extends StatelessWidget {
         vocabRepository: vocabRepository,
         deckRepository: deckRepository,
         settingsRepository: settingsRepository,
+        scheduleStore: scheduleStore,
       ),
     );
   }

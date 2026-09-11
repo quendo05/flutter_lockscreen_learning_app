@@ -13,3 +13,10 @@ const defaultSourceLanguage = 'en';
 
 /// The language the translations are written in, as a BCP 47 code.
 const defaultTargetLanguage = 'de';
+
+/// How many upcoming terms the app hands the lock screen at a time.
+///
+/// The queue has to outlast the longest plausible spell without opening the
+/// app, because nothing refills it in the meantime. At the widest pace on
+/// offer this is a fortnight; at the narrowest, two days.
+const publishedScheduleLength = 48;

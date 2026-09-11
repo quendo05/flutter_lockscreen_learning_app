@@ -1,12 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lockscreen_learning_app/config/defaults.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
+import 'package:lockscreen_learning_app/data/services/schedule_store.dart';
 import 'package:lockscreen_learning_app/domain/models/deck.dart';
 import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/home/view_models/home_view_model.dart';
 
+import '../../support/schedule_store_doubles.dart';
 import '../../support/vocab_repository_doubles.dart';
 
 void main() {
@@ -27,7 +30,9 @@ void main() {
   HomeViewModel buildViewModel({
     VocabRepository? vocabRepository,
     Duration interval = const Duration(hours: 3),
+    ScheduleStore? scheduleStore,
   }) => HomeViewModel(
+    scheduleStore: scheduleStore,
     vocabRepository: vocabRepository ?? InMemoryVocabRepository(),
     deckRepository: InMemoryDeckRepository(
       initialDecks: [
@@ -192,5 +197,72 @@ void main() {
     await viewModel.load();
 
     expect(notifications, greaterThan(0));
+  });
+
+  group('publishing to the lock screen', () {
+    test('hands over the queue, so the lock screen can rotate while the app '
+        'is closed', () async {
+      final store = RecordingScheduleStore();
+      final viewModel = buildViewModel(
+        vocabRepository: InMemoryVocabRepository(
+          initialEntries: [vocab('a'), vocab('b')],
+        ),
+        scheduleStore: store,
+      );
+
+      await viewModel.load();
+
+      expect(store.published, hasLength(1));
+      expect(store.last.entries.first.showAt, now);
+      expect(store.last.deckName, 'Spanish basics');
+      expect(store.last.interval, const Duration(hours: 3));
+    });
+
+    test(
+      'publishes far enough ahead to outlast a spell away from the app',
+      () async {
+        final store = RecordingScheduleStore();
+        final viewModel = buildViewModel(
+          vocabRepository: InMemoryVocabRepository(
+            initialEntries: [vocab('a')],
+          ),
+          scheduleStore: store,
+        );
+
+        await viewModel.load();
+
+        expect(store.last.entries, hasLength(publishedScheduleLength));
+      },
+    );
+
+    test('publishes an empty queue for an emptied deck, so the lock screen '
+        'stops showing terms that are gone', () async {
+      final store = RecordingScheduleStore();
+      final viewModel = buildViewModel(scheduleStore: store);
+
+      await viewModel.load();
+
+      expect(store.published, hasLength(1));
+      expect(store.last.entries, isEmpty);
+    });
+
+    test(
+      'leaves the screen readable when the queue cannot be written',
+      () async {
+        final viewModel = buildViewModel(
+          vocabRepository: InMemoryVocabRepository(
+            initialEntries: [vocab('a')],
+          ),
+          scheduleStore: FailingScheduleStore(),
+        );
+
+        await viewModel.load();
+
+        // The lock screen is stale, but the vocabulary was read fine and there
+        // is nothing the user could do about it from here.
+        expect(viewModel.loadError, isNull);
+        expect(viewModel.nextUp, isNotNull);
+      },
+    );
   });
 }

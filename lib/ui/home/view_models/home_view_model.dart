@@ -1,7 +1,12 @@
+import 'package:flutter/foundation.dart';
+
 import '../../../config/defaults.dart';
 import '../../../data/repositories/deck_repository.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../../data/repositories/vocab_repository.dart';
+import '../../../data/services/schedule_store.dart';
+import '../../../domain/models/deck.dart';
+import '../../../domain/models/published_schedule.dart';
 import '../../../domain/models/scheduled_vocab.dart';
 import '../../../domain/use_cases/build_vocab_schedule_use_case.dart';
 import '../../../utils/clock.dart';
@@ -15,6 +20,7 @@ class HomeViewModel extends LoadableViewModel {
     required this._deckRepository,
     required this._settingsRepository,
     this._buildSchedule = const BuildVocabScheduleUseCase(),
+    this._scheduleStore,
     Clock? clock,
   }) : _clock = clock ?? DateTime.now;
 
@@ -22,6 +28,10 @@ class HomeViewModel extends LoadableViewModel {
   final DeckRepository _deckRepository;
   final SettingsRepository _settingsRepository;
   final BuildVocabScheduleUseCase _buildSchedule;
+
+  /// Where the queue is left for the lock screen. Null where there is no
+  /// native side to read it, which is the web build and most tests.
+  final ScheduleStore? _scheduleStore;
   final Clock _clock;
 
   int _vocabularyCount = 0;
@@ -65,14 +75,46 @@ class HomeViewModel extends LoadableViewModel {
     _displayInterval = activeDeck?.displayInterval ?? defaultDisplayInterval;
     _vocabularyCount = vocabs.length;
 
-    // Two entries is enough for the screen: the term showing now, and the
-    // time the next one takes over.
+    // One queue serves both readers: this screen shows the first two, the
+    // lock screen works through all of them.
     _upcoming = _buildSchedule(
       vocabs: vocabs,
       interval: _displayInterval,
       from: _clock(),
-      count: vocabs.isEmpty ? 0 : 2,
+      count: vocabs.isEmpty ? 0 : publishedScheduleLength,
     );
+
+    await _publish(activeDeck);
+  }
+
+  /// Leaves the queue where the lock screen will find it.
+  ///
+  /// Published even when it is empty, so emptying a deck takes its terms off
+  /// the lock screen instead of leaving the last queue running.
+  ///
+  /// A failure here is logged and swallowed: the vocabulary was read fine, the
+  /// screen has everything it needs, and a stale lock screen is not something
+  /// the user could act on from here. It does mean a device that cannot write
+  /// goes quietly stale.
+  Future<void> _publish(Deck? deck) async {
+    final store = _scheduleStore;
+    if (store == null || deck == null) return;
+
+    try {
+      await store.write(
+        PublishedSchedule(
+          generatedAt: _clock(),
+          deckId: deck.id,
+          deckName: deck.name,
+          sourceLanguage: deck.sourceLanguage,
+          targetLanguage: deck.targetLanguage,
+          interval: deck.displayInterval,
+          entries: _upcoming,
+        ),
+      );
+    } on Object catch (error) {
+      debugPrint('HomeViewModel: could not publish the schedule: $error');
+    }
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../data/repositories/deck_repository.dart';
 import '../../../data/repositories/settings_repository.dart';
 import '../../../data/repositories/vocab_repository.dart';
+import '../../../data/services/schedule_store.dart';
 import '../../../domain/models/deck.dart';
 import '../../deck_list/view_models/deck_list_view_model.dart';
 import '../../deck_list/widgets/deck_list_screen.dart';
@@ -21,12 +22,17 @@ class AppShell extends StatefulWidget {
     required this.vocabRepository,
     required this.deckRepository,
     required this.settingsRepository,
+    this.scheduleStore,
     super.key,
   });
 
   final VocabRepository vocabRepository;
   final DeckRepository deckRepository;
   final SettingsRepository settingsRepository;
+
+  /// Where the queue is left for the lock screen. Null where nothing
+  /// native reads it, which is the web build.
+  final ScheduleStore? scheduleStore;
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -48,6 +54,7 @@ class _AppShellState extends State<AppShell> {
       vocabRepository: widget.vocabRepository,
       deckRepository: widget.deckRepository,
       settingsRepository: widget.settingsRepository,
+      scheduleStore: widget.scheduleStore,
     );
     _deckListViewModel = DeckListViewModel(
       deckRepository: widget.deckRepository,
