@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../domain/models/deck.dart';
+import '../../core/widgets/language_field.dart';
 import '../view_models/deck_settings_view_model.dart';
 
 /// One deck's settings: its name, the pair it is studied in, and its pace.
@@ -18,8 +19,12 @@ class DeckSettingsScreen extends StatefulWidget {
 
 class _DeckSettingsScreenState extends State<DeckSettingsScreen> {
   late final TextEditingController _name;
-  late final TextEditingController _sourceLanguage;
-  late final TextEditingController _targetLanguage;
+
+  /// Held as codes rather than as controllers: the pickers hand back a code
+  /// from a fixed list, so there is no text to keep or to parse.
+  late String _sourceLanguage;
+  late String _targetLanguage;
+
   late double _intervalHours;
 
   @override
@@ -27,10 +32,8 @@ class _DeckSettingsScreenState extends State<DeckSettingsScreen> {
     super.initState();
     final deck = widget.viewModel.deck;
     _name = TextEditingController(text: deck.name)..addListener(_onChanged);
-    _sourceLanguage = TextEditingController(text: deck.sourceLanguage)
-      ..addListener(_onChanged);
-    _targetLanguage = TextEditingController(text: deck.targetLanguage)
-      ..addListener(_onChanged);
+    _sourceLanguage = deck.sourceLanguage;
+    _targetLanguage = deck.targetLanguage;
     _intervalHours = deck.displayInterval.inHours
         .clamp(minDisplayIntervalHours, maxDisplayIntervalHours)
         .toDouble();
@@ -39,23 +42,20 @@ class _DeckSettingsScreenState extends State<DeckSettingsScreen> {
   @override
   void dispose() {
     _name.dispose();
-    _sourceLanguage.dispose();
-    _targetLanguage.dispose();
     super.dispose();
   }
 
   void _onChanged() => setState(() {});
 
-  bool get _canSave =>
-      _name.text.trim().isNotEmpty &&
-      _sourceLanguage.text.trim().isNotEmpty &&
-      _targetLanguage.text.trim().isNotEmpty;
+  /// Only the name can be left unusable now. A picker cannot report a
+  /// language it was not offering, so neither language needs guarding here.
+  bool get _canSave => _name.text.trim().isNotEmpty;
 
   Future<void> _save() async {
     final saved = await widget.viewModel.save(
       name: _name.text,
-      sourceLanguage: _sourceLanguage.text,
-      targetLanguage: _targetLanguage.text,
+      sourceLanguage: _sourceLanguage,
+      targetLanguage: _targetLanguage,
       intervalHours: _intervalHours.round(),
     );
 
@@ -91,24 +91,20 @@ class _DeckSettingsScreenState extends State<DeckSettingsScreen> {
           const SizedBox(height: 32),
           Text('Languages', style: theme.textTheme.titleMedium),
           const SizedBox(height: 16),
-          TextField(
+          LanguageField(
             key: const Key('source-language-field'),
-            controller: _sourceLanguage,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Language you are learning',
-              helperText: 'The terms in this deck are written in it',
-            ),
+            label: 'Language you are learning',
+            helperText: 'The terms in this deck are written in it',
+            value: _sourceLanguage,
+            onSelected: (code) => setState(() => _sourceLanguage = code),
           ),
           const SizedBox(height: 16),
-          TextField(
+          LanguageField(
             key: const Key('target-language-field'),
-            controller: _targetLanguage,
-            textInputAction: TextInputAction.done,
-            decoration: const InputDecoration(
-              labelText: 'Language you understand',
-              helperText: 'The translations are written in it',
-            ),
+            label: 'Language you understand',
+            helperText: 'The translations are written in it',
+            value: _targetLanguage,
+            onSelected: (code) => setState(() => _targetLanguage = code),
           ),
           const SizedBox(height: 32),
           Text('Pace', style: theme.textTheme.titleMedium),

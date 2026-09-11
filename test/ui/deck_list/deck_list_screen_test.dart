@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lockscreen_learning_app/config/defaults.dart';
+import 'package:lockscreen_learning_app/config/languages.dart';
 import 'package:lockscreen_learning_app/data/repositories/deck_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
@@ -20,6 +22,7 @@ class _FailingDeckRepository implements DeckRepository {
 
 void main() {
   final opened = <String>[];
+  late DeckRepository createdInto;
   final settingsOpened = <String>[];
 
   setUp(() {
@@ -46,6 +49,25 @@ void main() {
     createdAt: DateTime.utc(2026, 1, 1),
   );
 
+  /// Searches one of the sheet's language pickers and chooses the match.
+  Future<void> pickLanguage(
+    WidgetTester tester,
+    String fieldKey,
+    String name,
+  ) async {
+    final field = find.descendant(
+      of: find.byKey(Key(fieldKey)),
+      matching: find.byType(TextField),
+    );
+
+    await tester.tap(field);
+    await tester.pumpAndSettle();
+    await tester.enterText(field, name);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(MenuItemButton, name));
+    await tester.pumpAndSettle();
+  }
+
   Future<void> pumpScreen(
     WidgetTester tester, {
     DeckRepository? deckRepository,
@@ -53,11 +75,12 @@ void main() {
     String activeDeckId = 'a',
   }) {
     var counter = 0;
+    createdInto = deckRepository ?? InMemoryDeckRepository();
     return tester.pumpWidget(
       MaterialApp(
         home: DeckListScreen(
           viewModel: DeckListViewModel(
-            deckRepository: deckRepository ?? InMemoryDeckRepository(),
+            deckRepository: createdInto,
             vocabRepository: InMemoryVocabRepository(initialEntries: vocabs),
             settingsRepository: InMemorySettingsRepository(
               initialActiveDeckId: activeDeckId,
@@ -198,6 +221,47 @@ void main() {
 
     expect(find.text('Travel'), findsOneWidget);
     expect(find.text('No decks yet'), findsNothing);
+  });
+
+  testWidgets('offers the pair the app defaults to, already filled in', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Create deck'));
+    await tester.pumpAndSettle();
+
+    // Prefilled rather than blank, so naming a deck stays the one required
+    // step for someone learning the language the app already assumes.
+    expect(find.text(languageNameFor(defaultSourceLanguage)), findsOneWidget);
+    expect(find.text(languageNameFor(defaultTargetLanguage)), findsOneWidget);
+  });
+
+  testWidgets('creates the deck in the pair chosen on the form', (
+    tester,
+  ) async {
+    await pumpScreen(tester);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Create deck'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('deck-name-field')),
+      'Travel French',
+    );
+    await tester.pump();
+
+    await pickLanguage(tester, 'source-language-field', 'French');
+    await pickLanguage(tester, 'target-language-field', 'English');
+    await tester.tap(find.text('Create'));
+    await tester.pumpAndSettle();
+
+    final created = (await createdInto.getAll()).single;
+
+    expect(created.name, 'Travel French');
+    expect(created.sourceLanguage, 'fr');
+    expect(created.targetLanguage, 'en');
   });
 
   testWidgets('keeps Create unavailable until the name has content', (

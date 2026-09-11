@@ -9,7 +9,7 @@ library;
 const defaultDisplayInterval = Duration(hours: 3);
 
 /// The language the terms themselves are written in, as a BCP 47 code.
-const defaultSourceLanguage = 'es';
+const defaultSourceLanguage = 'en';
 
 /// The language the translations are written in, as a BCP 47 code.
 const defaultTargetLanguage = 'de';

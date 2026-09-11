@@ -44,8 +44,20 @@ class DeckListViewModel extends LoadableViewModel {
   @override
   String get loadErrorMessage => 'Could not read your decks. Please try again.';
 
-  /// Creates a deck from the name the user typed.
-  Future<void> createDeck(String name) async {
+  /// Creates a deck from the name the user typed and the pair they chose.
+  ///
+  /// The languages are asked for up front rather than defaulted and corrected
+  /// later: a deck's terms are stamped with its pair as they are added, so a
+  /// deck that starts in the wrong pair mislabels everything saved before
+  /// anyone visits its settings.
+  ///
+  /// The pace is not asked for. It has a sensible default and, unlike the
+  /// pair, changing it later costs nothing.
+  Future<void> createDeck(
+    String name, {
+    required String sourceLanguage,
+    required String targetLanguage,
+  }) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) {
       rejectInput('Give the deck a name.');
@@ -57,8 +69,8 @@ class DeckListViewModel extends LoadableViewModel {
         Deck(
           id: _idGenerator(),
           name: trimmed,
-          sourceLanguage: defaultSourceLanguage,
-          targetLanguage: defaultTargetLanguage,
+          sourceLanguage: sourceLanguage,
+          targetLanguage: targetLanguage,
           displayInterval: defaultDisplayInterval,
           createdAt: _clock(),
         ),

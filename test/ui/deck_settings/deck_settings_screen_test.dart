@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
 import 'package:lockscreen_learning_app/domain/models/deck.dart';
+import 'package:lockscreen_learning_app/ui/core/widgets/language_field.dart';
 import 'package:lockscreen_learning_app/ui/deck_settings/view_models/deck_settings_view_model.dart';
 import 'package:lockscreen_learning_app/ui/deck_settings/widgets/deck_settings_screen.dart';
 
@@ -55,13 +56,38 @@ void main() {
   String textIn(WidgetTester tester, String key) =>
       tester.widget<TextField>(find.byKey(Key(key))).controller!.text;
 
+  /// Searches one of the language pickers and chooses the match.
+  ///
+  /// Scoped to the field's own key because both pickers put a text field on
+  /// screen, and searched rather than scrolled to because the menu opens at
+  /// the current selection.
+  Future<void> pickLanguage(
+    WidgetTester tester,
+    String fieldKey,
+    String name,
+  ) async {
+    final field = find.descendant(
+      of: find.byKey(Key(fieldKey)),
+      matching: find.byType(TextField),
+    );
+
+    await tester.tap(field);
+    await tester.pumpAndSettle();
+    await tester.enterText(field, name);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(MenuItemButton, name));
+    await tester.pumpAndSettle();
+  }
+
   group('opening', () {
     testWidgets('fills the form in with the deck as it stands', (tester) async {
       await pumpScreen(tester);
 
       expect(textIn(tester, 'deck-name-field'), 'Spanish basics');
-      expect(textIn(tester, 'source-language-field'), 'es');
-      expect(textIn(tester, 'target-language-field'), 'de');
+      // Named, not coded: 'es' and 'de' are what get stored, not what the
+      // user should have to recognise.
+      expect(find.text('Spanish'), findsOneWidget);
+      expect(find.text('German'), findsOneWidget);
       expect(find.text('A new term every 3 hours'), findsOneWidget);
     });
 
@@ -96,15 +122,8 @@ void main() {
     testWidgets('stores an edited language pair', (tester) async {
       await pumpScreen(tester);
 
-      await tester.enterText(
-        find.byKey(const Key('source-language-field')),
-        'fr',
-      );
-      await tester.enterText(
-        find.byKey(const Key('target-language-field')),
-        'en',
-      );
-      await tester.pump();
+      await pickLanguage(tester, 'source-language-field', 'French');
+      await pickLanguage(tester, 'target-language-field', 'English');
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
@@ -145,21 +164,18 @@ void main() {
       );
     });
 
-    testWidgets('keeps Save unavailable while a language is blank', (
-      tester,
-    ) async {
+    testWidgets('offers no way to blank a language at all', (tester) async {
       await pumpScreen(tester);
 
-      await tester.enterText(
-        find.byKey(const Key('source-language-field')),
-        '',
-      );
-      await tester.pump();
-
-      expect(
-        tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
-        isNull,
-      );
+      // The pickers are the only way in, and a picker can only report a
+      // language it was offering. DeckSettingsViewModel still rejects a blank
+      // one; nothing on this screen can produce it.
+      expect(find.byType(LanguageField), findsNWidgets(2));
+      for (final field in tester.widgetList<LanguageField>(
+        find.byType(LanguageField),
+      )) {
+        expect(field.value, isNotEmpty);
+      }
     });
 
     testWidgets('stays on the screen, so the edit is not lost', (tester) async {

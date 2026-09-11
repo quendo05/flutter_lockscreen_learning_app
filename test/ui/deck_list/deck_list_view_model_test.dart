@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:lockscreen_learning_app/config/defaults.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
@@ -91,16 +92,49 @@ void main() {
     test('stores the new deck and shows it in the list', () async {
       final viewModel = buildViewModel();
 
-      await viewModel.createDeck('Spanish basics');
+      await viewModel.createDeck(
+        'Spanish basics',
+        sourceLanguage: 'es',
+        targetLanguage: 'de',
+      );
 
       expect(viewModel.decks.single.name, 'Spanish basics');
       expect(viewModel.decks.single.id, 'new-1');
     });
 
+    test('stores the pair the deck is to be studied in', () async {
+      final viewModel = buildViewModel();
+
+      await viewModel.createDeck(
+        'Travel French',
+        sourceLanguage: 'fr',
+        targetLanguage: 'en',
+      );
+
+      expect(viewModel.decks.single.sourceLanguage, 'fr');
+      expect(viewModel.decks.single.targetLanguage, 'en');
+    });
+
+    test('starts a new deck at the pace the app defaults to', () async {
+      final viewModel = buildViewModel();
+
+      await viewModel.createDeck(
+        'Travel',
+        sourceLanguage: 'fr',
+        targetLanguage: 'en',
+      );
+
+      expect(viewModel.decks.single.displayInterval, defaultDisplayInterval);
+    });
+
     test('trims surrounding whitespace from the name', () async {
       final viewModel = buildViewModel();
 
-      await viewModel.createDeck('  Travel  ');
+      await viewModel.createDeck(
+        '  Travel  ',
+        sourceLanguage: 'es',
+        targetLanguage: 'de',
+      );
 
       expect(viewModel.decks.single.name, 'Travel');
     });
@@ -108,7 +142,11 @@ void main() {
     test('refuses a blank name instead of storing an unnamed deck', () async {
       final viewModel = buildViewModel();
 
-      await viewModel.createDeck('   ');
+      await viewModel.createDeck(
+        '   ',
+        sourceLanguage: 'es',
+        targetLanguage: 'de',
+      );
 
       expect(viewModel.decks, isEmpty);
       expect(viewModel.validationMessage, isNotNull);
@@ -118,7 +156,11 @@ void main() {
       final viewModel = buildViewModel(decks: [deck('a', name: 'Kept')]);
       await viewModel.load();
 
-      await viewModel.createDeck('');
+      await viewModel.createDeck(
+        '',
+        sourceLanguage: 'es',
+        targetLanguage: 'de',
+      );
 
       expect(viewModel.decks.single.name, 'Kept');
       expect(viewModel.loadError, isNull);
@@ -128,7 +170,11 @@ void main() {
       final viewModel = buildViewModel(activeDeckId: defaultDeckId);
       await viewModel.load();
 
-      await viewModel.createDeck('Travel');
+      await viewModel.createDeck(
+        'Travel',
+        sourceLanguage: 'es',
+        targetLanguage: 'de',
+      );
 
       expect(viewModel.activeDeckId, defaultDeckId);
     });
