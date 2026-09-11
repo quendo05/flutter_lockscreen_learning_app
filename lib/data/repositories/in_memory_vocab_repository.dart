@@ -34,4 +34,9 @@ class InMemoryVocabRepository implements VocabRepository {
   Future<void> delete(String id) async {
     _entriesById.remove(id);
   }
+
+  @override
+  Future<void> deleteByDeck(String deckId) async {
+    _entriesById.removeWhere((_, entry) => entry.deckId == deckId);
+  }
 }

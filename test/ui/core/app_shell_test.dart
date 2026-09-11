@@ -11,17 +11,40 @@ import '../../support/schedule_store_doubles.dart';
 void main() {
   Deck seededDeck() => Deck.initial(createdAt: DateTime.utc(2026, 1, 1));
 
-  Future<void> pumpShell(WidgetTester tester, {RecordingScheduleStore? store}) {
+  late InMemoryDeckRepository deckRepository;
+
+  Future<void> pumpShell(
+    WidgetTester tester, {
+    RecordingScheduleStore? store,
+    List<Deck>? decks,
+  }) {
+    deckRepository = InMemoryDeckRepository(
+      initialDecks: decks ?? [seededDeck()],
+    );
     return tester.pumpWidget(
       MaterialApp(
         home: AppShell(
           vocabRepository: InMemoryVocabRepository(),
-          deckRepository: InMemoryDeckRepository(initialDecks: [seededDeck()]),
+          deckRepository: deckRepository,
           settingsRepository: InMemorySettingsRepository(),
           scheduleStore: store,
         ),
       ),
     );
+  }
+
+  /// Works through the confirmation the settings screen puts in the way.
+  Future<void> deleteOpenDeck(WidgetTester tester) async {
+    await tester.dragUntilVisible(
+      find.text('Delete deck'),
+      find.byType(ListView),
+      const Offset(0, -120),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete deck'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await tester.pumpAndSettle();
   }
 
   /// Drives the app all the way to the background and back, the way the
@@ -205,6 +228,52 @@ void main() {
       // The web build passes no store at all; going to the background must
       // not be the thing that breaks it.
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('deleting a deck', () {
+    final travel = Deck(
+      id: 'travel',
+      name: 'Travel',
+      sourceLanguage: 'es',
+      targetLanguage: 'de',
+      displayInterval: const Duration(hours: 3),
+      createdAt: DateTime.utc(2026, 2, 1),
+    );
+
+    testWidgets('takes it off the deck list', (tester) async {
+      await pumpShell(tester, decks: [seededDeck(), travel]);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Decks'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Settings for Travel'));
+      await tester.pumpAndSettle();
+      await deleteOpenDeck(tester);
+
+      expect(find.text('Travel'), findsNothing);
+      expect(find.text(defaultDeckName), findsOneWidget);
+      expect(await deckRepository.getById('travel'), isNull);
+    });
+
+    testWidgets('closes the deck being looked at, which has nothing left to '
+        'show', (tester) async {
+      await pumpShell(tester, decks: [seededDeck(), travel]);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Decks'));
+      await tester.pumpAndSettle();
+
+      // Into the deck, then into its settings from there.
+      await tester.tap(find.text('Travel'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Deck settings'));
+      await tester.pumpAndSettle();
+
+      await deleteOpenDeck(tester);
+
+      // Back on the deck list, not stranded on a page for a deck that is gone.
+      expect(find.byTooltip('Create deck'), findsOneWidget);
+      expect(find.text('Travel'), findsNothing);
     });
   });
 }

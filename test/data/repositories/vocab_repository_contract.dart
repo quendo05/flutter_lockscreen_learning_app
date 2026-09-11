@@ -146,4 +146,29 @@ void runVocabRepositoryContract(Future<VocabRepository> Function() create) {
       await expectLater(repository.delete('missing'), completes);
     });
   });
+
+  group('deleteByDeck', () {
+    test('removes every entry filed under that deck', () async {
+      await repository.save(contractVocab('a'));
+      await repository.save(contractVocab('b'));
+
+      await repository.deleteByDeck(contractDeckId);
+
+      expect(await repository.getByDeck(contractDeckId), isEmpty);
+    });
+
+    test('leaves the entries of other decks alone, which is what makes it '
+        'safe to delete one deck', () async {
+      await repository.save(contractVocab('a', deckId: 'spanish'));
+      await repository.save(contractVocab('b', deckId: 'french'));
+
+      await repository.deleteByDeck('spanish');
+
+      expect((await repository.getByDeck('french')).single.id, 'b');
+    });
+
+    test('is a no-op for a deck that holds nothing', () async {
+      await expectLater(repository.deleteByDeck('empty'), completes);
+    });
+  });
 }

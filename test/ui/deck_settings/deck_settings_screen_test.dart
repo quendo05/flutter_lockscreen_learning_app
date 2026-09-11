@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
+import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
+import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
 import 'package:lockscreen_learning_app/domain/models/deck.dart';
+import 'package:lockscreen_learning_app/domain/models/vocab.dart';
 import 'package:lockscreen_learning_app/ui/core/widgets/language_field.dart';
 import 'package:lockscreen_learning_app/ui/deck_settings/view_models/deck_settings_view_model.dart';
 import 'package:lockscreen_learning_app/ui/deck_settings/widgets/deck_settings_screen.dart';
@@ -16,28 +19,52 @@ void main() {
     createdAt: DateTime.utc(2026, 1, 1),
   );
 
+  Vocab vocab(String id, String deckId) => Vocab(
+    id: id,
+    deckId: deckId,
+    term: 'term-$id',
+    translation: 'translation-$id',
+    sourceLanguage: 'es',
+    targetLanguage: 'de',
+    createdAt: DateTime.utc(2026, 1, 1),
+  );
+
+  final otherDeck = deck.copyWith(id: 'd2', name: 'Travel');
+
   late InMemoryDeckRepository repository;
-  Deck? popped;
+  late InMemoryVocabRepository vocabRepository;
+  DeckSettingsOutcome? popped;
 
   setUp(() {
     repository = InMemoryDeckRepository(initialDecks: [deck]);
+    vocabRepository = InMemoryVocabRepository();
     popped = null;
   });
 
   /// Pushes the screen from a host route, so popping with a result is real.
-  Future<void> pumpScreen(WidgetTester tester) async {
+  Future<void> pumpScreen(
+    WidgetTester tester, {
+    List<Deck>? decks,
+    List<Vocab> vocabs = const [],
+  }) async {
+    repository = InMemoryDeckRepository(initialDecks: decks ?? [deck]);
+    vocabRepository = InMemoryVocabRepository(initialEntries: vocabs);
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
           builder: (context) => Scaffold(
             body: ElevatedButton(
               onPressed: () async {
-                popped = await Navigator.of(context).push<Deck>(
-                  MaterialPageRoute<Deck>(
+                popped = await Navigator.of(context).push<DeckSettingsOutcome>(
+                  MaterialPageRoute<DeckSettingsOutcome>(
                     builder: (_) => DeckSettingsScreen(
                       viewModel: DeckSettingsViewModel(
                         deck: deck,
-                        repository: repository,
+                        deckRepository: repository,
+                        vocabRepository: vocabRepository,
+                        settingsRepository: InMemorySettingsRepository(
+                          initialActiveDeckId: deck.id,
+                        ),
                       ),
                     ),
                   ),
@@ -115,7 +142,7 @@ void main() {
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
-      expect(popped?.name, 'Travel Spanish');
+      expect((popped! as DeckSaved).deck.name, 'Travel Spanish');
       expect((await repository.getById('d1'))!.name, 'Travel Spanish');
     });
 
@@ -186,6 +213,107 @@ void main() {
 
       expect(find.text('Deck settings'), findsOneWidget);
       expect(popped, isNull);
+    });
+  });
+
+  /// Scrolls down to the destructive section, which sits below the fold on
+  /// purpose.
+  Future<void> scrollToDelete(WidgetTester tester) async {
+    await tester.dragUntilVisible(
+      find.text('Delete deck'),
+      find.byType(ListView),
+      const Offset(0, -120),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  group('deleting the deck', () {
+    testWidgets('says why the only deck cannot be deleted, rather than '
+        'hiding the option and leaving the user hunting for it', (
+      tester,
+    ) async {
+      await pumpScreen(tester, decks: [deck]);
+      await scrollToDelete(tester);
+
+      expect(
+        tester
+            .widget<OutlinedButton>(
+              find.widgetWithText(OutlinedButton, 'Delete deck'),
+            )
+            .onPressed,
+        isNull,
+      );
+      expect(find.textContaining('only deck'), findsOneWidget);
+    });
+
+    testWidgets('offers the deletion once there is another deck', (
+      tester,
+    ) async {
+      await pumpScreen(tester, decks: [deck, otherDeck]);
+      await scrollToDelete(tester);
+
+      expect(
+        tester
+            .widget<OutlinedButton>(
+              find.widgetWithText(OutlinedButton, 'Delete deck'),
+            )
+            .onPressed,
+        isNotNull,
+      );
+    });
+
+    testWidgets('asks first, naming the terms that go with it', (tester) async {
+      await pumpScreen(
+        tester,
+        decks: [deck, otherDeck],
+        vocabs: [vocab('1', 'd1'), vocab('2', 'd1')],
+      );
+
+      await scrollToDelete(tester);
+      await tester.tap(find.text('Delete deck'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.textContaining('2 terms'), findsOneWidget);
+    });
+
+    testWidgets('changes nothing when the question is declined', (
+      tester,
+    ) async {
+      await pumpScreen(tester, decks: [deck, otherDeck]);
+
+      await scrollToDelete(tester);
+      await tester.tap(find.text('Delete deck'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(await repository.getById('d1'), isNotNull);
+      expect(find.text('Deck settings'), findsOneWidget);
+      expect(popped, isNull);
+    });
+
+    testWidgets('removes the deck and its terms once agreed, and closes', (
+      tester,
+    ) async {
+      await pumpScreen(
+        tester,
+        decks: [deck, otherDeck],
+        vocabs: [vocab('1', 'd1'), vocab('2', 'd2')],
+      );
+
+      await scrollToDelete(tester);
+      await tester.tap(find.text('Delete deck'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+      await tester.pumpAndSettle();
+
+      expect(await repository.getById('d1'), isNull);
+      expect(await vocabRepository.getByDeck('d1'), isEmpty);
+      // The other deck is untouched, which is what makes this safe.
+      expect(await vocabRepository.getByDeck('d2'), hasLength(1));
+      expect(popped, isA<DeckDeleted>());
+      expect(find.text('Deck settings'), findsNothing);
     });
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../data/repositories/deck_repository.dart';
+import '../../../data/repositories/settings_repository.dart';
 import '../../../data/repositories/vocab_repository.dart';
 import '../../../domain/models/deck.dart';
 import '../../deck_settings/view_models/deck_settings_view_model.dart';
@@ -18,12 +19,17 @@ class DeckVocabPage extends StatefulWidget {
     required this.deck,
     required this.vocabRepository,
     required this.deckRepository,
+    required this.settingsRepository,
     super.key,
   });
 
   final Deck deck;
   final VocabRepository vocabRepository;
   final DeckRepository deckRepository;
+
+  /// Needed only so the settings screen can hand the lock screen to another
+  /// deck when this one is deleted.
+  final SettingsRepository settingsRepository;
 
   @override
   State<DeckVocabPage> createState() => _DeckVocabPageState();
@@ -49,24 +55,34 @@ class _DeckVocabPageState extends State<DeckVocabPage> {
     super.dispose();
   }
 
-  /// Opens the deck's settings, then adopts whatever came back so the title
-  /// and the language pair for new terms both reflect the edit.
+  /// Opens the deck's settings and acts on what comes back: an edit is
+  /// adopted so the title and the pair for new terms reflect it, and a
+  /// deletion closes this page, which has nothing left to show.
   Future<void> _openSettings() async {
-    final updated = await Navigator.of(context).push<Deck>(
-      MaterialPageRoute<Deck>(
+    final outcome = await Navigator.of(context).push<DeckSettingsOutcome>(
+      MaterialPageRoute<DeckSettingsOutcome>(
         builder: (_) => DeckSettingsScreen(
           viewModel: DeckSettingsViewModel(
             deck: _deck,
-            repository: widget.deckRepository,
+            deckRepository: widget.deckRepository,
+            vocabRepository: widget.vocabRepository,
+            settingsRepository: widget.settingsRepository,
           ),
         ),
       ),
     );
 
-    if (updated == null || !mounted) return;
+    if (!mounted) return;
 
-    setState(() => _deck = updated);
-    _viewModel.adoptDeck(updated);
+    switch (outcome) {
+      case DeckSaved(:final deck):
+        setState(() => _deck = deck);
+        _viewModel.adoptDeck(deck);
+      case DeckDeleted():
+        Navigator.of(context).pop();
+      case null:
+        break;
+    }
   }
 
   @override

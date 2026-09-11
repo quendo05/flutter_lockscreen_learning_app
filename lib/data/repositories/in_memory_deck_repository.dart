@@ -27,4 +27,9 @@ class InMemoryDeckRepository implements DeckRepository {
   Future<void> save(Deck deck) async {
     _decksById[deck.id] = deck;
   }
+
+  @override
+  Future<void> delete(String id) async {
+    _decksById.remove(id);
+  }
 }

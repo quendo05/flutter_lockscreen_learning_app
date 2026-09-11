@@ -106,6 +106,7 @@ class _AppShellState extends State<AppShell> {
           deck: deck,
           vocabRepository: widget.vocabRepository,
           deckRepository: widget.deckRepository,
+          settingsRepository: widget.settingsRepository,
         ),
       ),
     );
@@ -115,16 +116,20 @@ class _AppShellState extends State<AppShell> {
   /// Opens a deck's settings straight from the list, then reloads it so a
   /// renamed deck shows its new name without the user having to open it.
   Future<void> _openDeckSettings(Deck deck) async {
-    await Navigator.of(context).push<Deck>(
-      MaterialPageRoute<Deck>(
+    await Navigator.of(context).push<DeckSettingsOutcome>(
+      MaterialPageRoute<DeckSettingsOutcome>(
         builder: (_) => DeckSettingsScreen(
           viewModel: DeckSettingsViewModel(
             deck: deck,
-            repository: widget.deckRepository,
+            deckRepository: widget.deckRepository,
+            vocabRepository: widget.vocabRepository,
+            settingsRepository: widget.settingsRepository,
           ),
         ),
       ),
     );
+    // Reloaded whatever came back: a rename, a deletion and a plain return
+    // all leave the list needing a fresh read.
     await _deckListViewModel.load();
   }
 

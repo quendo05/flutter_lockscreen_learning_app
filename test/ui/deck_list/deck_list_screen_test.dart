@@ -18,6 +18,8 @@ class _FailingDeckRepository implements DeckRepository {
   Future<Deck?> getById(String id) async => throw Exception('offline');
   @override
   Future<void> save(Deck deck) async => throw Exception('offline');
+  @override
+  Future<void> delete(String id) async => throw Exception('offline');
 }
 
 void main() {

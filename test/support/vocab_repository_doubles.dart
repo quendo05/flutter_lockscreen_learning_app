@@ -18,6 +18,8 @@ class FailingVocabRepository implements VocabRepository {
   Future<void> save(Vocab vocab) async => throw Exception('offline');
   @override
   Future<void> delete(String id) async => throw Exception('offline');
+  @override
+  Future<void> deleteByDeck(String deckId) async => throw Exception('offline');
 }
 
 /// A repository whose reads never complete, so a screen stays in its loading
@@ -32,6 +34,8 @@ class HangingVocabRepository implements VocabRepository {
   Future<void> save(Vocab vocab) async {}
   @override
   Future<void> delete(String id) async {}
+  @override
+  Future<void> deleteByDeck(String deckId) async {}
 }
 
 /// A repository that reads fine but refuses every write.
@@ -56,4 +60,8 @@ class FailingOnSaveVocabRepository implements VocabRepository {
 
   @override
   Future<void> delete(String id) async => throw Exception('read-only');
+
+  @override
+  Future<void> deleteByDeck(String deckId) async =>
+      throw Exception('read-only');
 }

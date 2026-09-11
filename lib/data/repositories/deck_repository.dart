@@ -1,9 +1,6 @@
 import '../../domain/models/deck.dart';
 
 /// The source of truth for decks.
-///
-/// There is deliberately no delete: nothing asks for it yet, and removing a
-/// deck raises the question of what happens to the terms inside it.
 abstract class DeckRepository {
   /// All stored decks, oldest first, so the list order stays stable as decks
   /// are added.
@@ -14,4 +11,11 @@ abstract class DeckRepository {
 
   /// Inserts [deck], replacing any deck that already carries the same id.
   Future<void> save(Deck deck);
+
+  /// Removes the deck with [id]. Unknown ids are ignored.
+  ///
+  /// Says nothing about the terms filed under it: a repository stores what it
+  /// is given, and what a deck's terms are worth once the deck is gone is a
+  /// decision for whoever is deleting it, not for the store.
+  Future<void> delete(String id);
 }

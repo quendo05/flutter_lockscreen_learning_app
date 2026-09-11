@@ -18,4 +18,12 @@ abstract class VocabRepository {
 
   /// Removes the entry with [id]. Unknown ids are ignored.
   Future<void> delete(String id);
+
+  /// Removes every entry filed under [deckId]. A deck holding nothing is
+  /// ignored.
+  ///
+  /// One call rather than a delete per entry so the database can clear a deck
+  /// in a single statement, and so a half-finished loop cannot leave a deck
+  /// partly emptied.
+  Future<void> deleteByDeck(String deckId);
 }

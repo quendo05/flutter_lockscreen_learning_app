@@ -51,4 +51,10 @@ class SqfliteVocabRepository implements VocabRepository {
   Future<void> delete(String id) async {
     await _database.delete(_table, where: 'id = ?', whereArgs: [id]);
   }
+
+  @override
+  Future<void> deleteByDeck(String deckId) async {
+    // The deckId index makes this one indexed delete rather than a scan.
+    await _database.delete(_table, where: 'deckId = ?', whereArgs: [deckId]);
+  }
 }

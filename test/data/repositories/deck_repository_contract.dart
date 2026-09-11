@@ -76,4 +76,27 @@ void runDeckRepositoryContract(Future<DeckRepository> Function() create) {
       expect(await repository.getById('missing'), isNull);
     });
   });
+
+  group('delete', () {
+    test('removes the deck with the given id', () async {
+      await repository.save(contractDeck('a'));
+
+      await repository.delete('a');
+
+      expect(await repository.getById('a'), isNull);
+    });
+
+    test('leaves the other decks alone', () async {
+      await repository.save(contractDeck('a'));
+      await repository.save(contractDeck('b'));
+
+      await repository.delete('a');
+
+      expect((await repository.getAll()).single.id, 'b');
+    });
+
+    test('is a no-op for an unknown id rather than throwing', () async {
+      await expectLater(repository.delete('missing'), completes);
+    });
+  });
 }

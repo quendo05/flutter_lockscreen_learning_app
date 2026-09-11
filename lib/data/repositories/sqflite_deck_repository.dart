@@ -38,4 +38,9 @@ class SqfliteDeckRepository implements DeckRepository {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+  @override
+  Future<void> delete(String id) async {
+    await _database.delete(_table, where: 'id = ?', whereArgs: [id]);
+  }
 }
