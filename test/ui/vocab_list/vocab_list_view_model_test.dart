@@ -166,24 +166,198 @@ void main() {
     });
   });
 
-  group('deleteVocab', () {
-    test('removes the entry from the list', () async {
-      final viewModel = buildViewModel(InMemoryVocabRepository());
-      await viewModel.addVocab(term: 'la casa', translation: 'das Haus');
+  Future<VocabListViewModel> withTwoTerms() async {
+    final viewModel = buildViewModel(InMemoryVocabRepository());
+    await viewModel.addVocab(term: 'la casa', translation: 'das Haus');
+    await viewModel.addVocab(term: 'el perro', translation: 'der Hund');
+    return viewModel;
+  }
 
-      await viewModel.deleteVocab('id-1');
+  group('selection', () {
+    test('starts switched off, so the list opens ready to read', () async {
+      final viewModel = await withTwoTerms();
+
+      expect(viewModel.isSelecting, isFalse);
+      expect(viewModel.selectedCount, 0);
+    });
+
+    test('marks the entry that began it, so a long press takes one step', () async {
+      final viewModel = await withTwoTerms();
+
+      viewModel.beginSelection('id-1');
+
+      expect(viewModel.isSelecting, isTrue);
+      expect(viewModel.isSelected('id-1'), isTrue);
+      expect(viewModel.selectedCount, 1);
+    });
+
+    test('enters with nothing marked when no entry began it', () async {
+      final viewModel = await withTwoTerms();
+
+      viewModel.beginSelection();
+
+      expect(viewModel.isSelecting, isTrue);
+      expect(viewModel.selectedCount, 0);
+    });
+
+    test('toggles a mark off again on a second tap', () async {
+      final viewModel = await withTwoTerms();
+      viewModel.beginSelection('id-1');
+
+      viewModel.toggleSelection('id-1');
+
+      expect(viewModel.isSelected('id-1'), isFalse);
+    });
+
+    test('marks everything, then clears everything, from one action', () async {
+      final viewModel = await withTwoTerms();
+      viewModel.beginSelection();
+
+      viewModel.toggleSelectAll();
+      expect(viewModel.areAllSelected, isTrue);
+      expect(viewModel.selectedCount, 2);
+
+      viewModel.toggleSelectAll();
+      expect(viewModel.areAllSelected, isFalse);
+      expect(viewModel.selectedCount, 0);
+    });
+
+    test('offers a single selection only when exactly one is marked', () async {
+      final viewModel = await withTwoTerms();
+      viewModel.beginSelection('id-1');
+
+      expect(viewModel.singleSelection?.term, 'la casa');
+
+      viewModel.toggleSelection('id-2');
+      expect(viewModel.singleSelection, isNull);
+    });
+
+    test('leaving selection drops every mark, so it cannot come back armed', () async {
+      final viewModel = await withTwoTerms();
+      viewModel.beginSelection('id-1');
+
+      viewModel.endSelection();
+
+      expect(viewModel.isSelecting, isFalse);
+      expect(viewModel.selectedCount, 0);
+    });
+
+    test('forgets a mark on an entry that is no longer there', () async {
+      final repository = InMemoryVocabRepository();
+      final viewModel = buildViewModel(repository);
+      await viewModel.addVocab(term: 'la casa', translation: 'das Haus');
+      viewModel.beginSelection('id-1');
+
+      await repository.delete('id-1');
+      await viewModel.load();
+
+      expect(viewModel.selectedCount, 0);
+    });
+  });
+
+  group('deleteSelected', () {
+    test('removes every marked entry and keeps the rest', () async {
+      final viewModel = await withTwoTerms();
+      viewModel.beginSelection('id-1');
+
+      await viewModel.deleteSelected();
+
+      expect(viewModel.vocabs.single.term, 'el perro');
+    });
+
+    test('empties the deck when everything is marked', () async {
+      final viewModel = await withTwoTerms();
+      viewModel.beginSelection();
+      viewModel.toggleSelectAll();
+
+      await viewModel.deleteSelected();
 
       expect(viewModel.vocabs, isEmpty);
     });
 
-    test('keeps the other entries', () async {
-      final viewModel = buildViewModel(InMemoryVocabRepository());
+    test('leaves selection afterwards, because there is nothing left to act on', () async {
+      final viewModel = await withTwoTerms();
+      viewModel.beginSelection('id-1');
+
+      await viewModel.deleteSelected();
+
+      expect(viewModel.isSelecting, isFalse);
+      expect(viewModel.selectedCount, 0);
+    });
+
+    test('does nothing when no entry is marked', () async {
+      final viewModel = await withTwoTerms();
+      viewModel.beginSelection();
+
+      await viewModel.deleteSelected();
+
+      expect(viewModel.vocabs, hasLength(2));
+    });
+  });
+
+  group('editVocab', () {
+    test('rewrites the entry in place, so the list shows the new wording', () async {
+      final viewModel = await withTwoTerms();
+      final original = viewModel.vocabs.firstWhere((v) => v.id == 'id-1');
+
+      await viewModel.editVocab(
+        vocab: original,
+        term: 'la casita',
+        translation: 'das Häuschen',
+      );
+
+      final edited = viewModel.vocabs.firstWhere((v) => v.id == 'id-1');
+      expect(edited.term, 'la casita');
+      expect(edited.translation, 'das Häuschen');
+      expect(viewModel.vocabs, hasLength(2));
+    });
+
+    test('keeps the practice counts, so a correction does not reset progress', () async {
+      final repository = InMemoryVocabRepository();
+      final viewModel = buildViewModel(repository);
       await viewModel.addVocab(term: 'la casa', translation: 'das Haus');
-      await viewModel.addVocab(term: 'el perro', translation: 'der Hund');
+      final shown = viewModel.vocabs.single.markShown(fixedNow);
+      await repository.save(shown);
+      await viewModel.load();
 
-      await viewModel.deleteVocab('id-1');
+      await viewModel.editVocab(
+        vocab: viewModel.vocabs.single,
+        term: 'la casita',
+        translation: 'das Häuschen',
+      );
 
-      expect(viewModel.vocabs.single.term, 'el perro');
+      expect(viewModel.vocabs.single.timesShown, 1);
+      expect(viewModel.vocabs.single.lastShownAt, fixedNow);
+    });
+
+    test('trims surrounding whitespace from what the user typed', () async {
+      final viewModel = await withTwoTerms();
+
+      await viewModel.editVocab(
+        vocab: viewModel.vocabs.firstWhere((v) => v.id == 'id-1'),
+        term: '  la casita  ',
+        translation: '  das Häuschen  ',
+      );
+
+      final edited = viewModel.vocabs.firstWhere((v) => v.id == 'id-1');
+      expect(edited.term, 'la casita');
+    });
+
+    test('refuses a blank term instead of storing an unusable entry', () async {
+      final viewModel = await withTwoTerms();
+      final original = viewModel.vocabs.firstWhere((v) => v.id == 'id-1');
+
+      await viewModel.editVocab(
+        vocab: original,
+        term: '   ',
+        translation: 'das Haus',
+      );
+
+      expect(viewModel.validationMessage, isNotNull);
+      expect(
+        viewModel.vocabs.firstWhere((v) => v.id == 'id-1').term,
+        'la casa',
+      );
     });
   });
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/ui/vocab_list/widgets/add_vocab_sheet.dart';
+import 'package:lockscreen_learning_app/ui/vocab_list/widgets/vocab_sheet.dart';
 
 void main() {
   final submissions = <(String, String)>[];
@@ -11,7 +11,7 @@ void main() {
     return tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: AddVocabSheet(
+          body: VocabSheet(
             onSubmit: (term, translation) =>
                 submissions.add((term, translation)),
           ),

@@ -104,20 +104,122 @@ void main() {
     expect(find.text('das Buch'), findsOneWidget);
   });
 
-  testWidgets('removes a term when its delete button is used', (tester) async {
+  Future<void> pumpTwoTerms(WidgetTester tester) async {
     await pumpScreen(
       tester,
       InMemoryVocabRepository(
-        initialEntries: [vocab('a', 'la casa', 'das Haus')],
+        initialEntries: [
+          vocab('a', 'la casa', 'das Haus'),
+          vocab('b', 'el perro', 'der Hund'),
+        ],
       ),
     );
     await tester.pumpAndSettle();
+  }
 
-    await tester.tap(find.byTooltip('Delete la casa'));
+  Future<void> mark(WidgetTester tester, String term) async {
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(term));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('puts no delete button on a row, so scrolling cannot destroy a '
+      'term', (tester) async {
+    await pumpTwoTerms(tester);
+
+    expect(find.byTooltip('Delete la casa'), findsNothing);
+    expect(find.byIcon(Icons.delete_outline), findsNothing);
+  });
+
+  testWidgets('counts what is marked, so the bar says what will be acted on', (
+    tester,
+  ) async {
+    await pumpTwoTerms(tester);
+
+    await mark(tester, 'la casa');
+
+    expect(find.text('1 selected'), findsOneWidget);
+  });
+
+  testWidgets('marks every term from one action', (tester) async {
+    await pumpTwoTerms(tester);
+    await tester.tap(find.text('Edit'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Select all'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 selected'), findsOneWidget);
+    // The label now offers the other half of the toggle, so the user is never
+    // left guessing which state they are in.
+    expect(find.text('Clear'), findsOneWidget);
+  });
+
+  testWidgets('deletes the marked terms once the question is agreed', (
+    tester,
+  ) async {
+    await pumpTwoTerms(tester);
+    await mark(tester, 'la casa');
+
+    await tester.tap(find.byTooltip('Delete selected'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
     await tester.pumpAndSettle();
 
     expect(find.text('la casa'), findsNothing);
-    expect(find.text('No vocabulary yet'), findsOneWidget);
+    expect(find.text('el perro'), findsOneWidget);
+  });
+
+  testWidgets('keeps the marked terms when the question is declined', (
+    tester,
+  ) async {
+    await pumpTwoTerms(tester);
+    await mark(tester, 'la casa');
+
+    await tester.tap(find.byTooltip('Delete selected'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('la casa'), findsOneWidget);
+  });
+
+  testWidgets('edits the one marked term through the form', (tester) async {
+    await pumpTwoTerms(tester);
+    await mark(tester, 'la casa');
+
+    await tester.tap(find.byTooltip('Edit la casa'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('term-field')), 'la casita');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('la casita'), findsOneWidget);
+    expect(find.text('la casa'), findsNothing);
+  });
+
+  testWidgets('offers no edit while more than one term is marked, because '
+      'editing is a single-entry job', (tester) async {
+    await pumpTwoTerms(tester);
+    await mark(tester, 'la casa');
+    await tester.tap(find.text('el perro'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.edit_outlined), findsNothing);
+  });
+
+  testWidgets('leaves selection through the close button, dropping the marks', (
+    tester,
+  ) async {
+    await pumpTwoTerms(tester);
+    await mark(tester, 'la casa');
+
+    await tester.tap(find.byTooltip('Done'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 selected'), findsNothing);
+    expect(find.text('Spanish basics'), findsOneWidget);
   });
 
   testWidgets('leaves Save unavailable while the form is still blank', (

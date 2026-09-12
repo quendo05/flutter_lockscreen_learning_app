@@ -1,27 +1,35 @@
 import 'package:flutter/material.dart';
 
+import '../../../domain/models/vocab.dart';
 import '../../core/widgets/form_sheet.dart';
 
-/// Bottom sheet for entering a single new vocabulary pair.
+/// Bottom sheet for entering a single vocabulary pair, new or existing.
+///
+/// One sheet for both, because adding and editing ask for exactly the same two
+/// things and enforce the same rule. A second form would be the same fields,
+/// the same validation and the same keyboard handling, kept in step by hand.
 ///
 /// Guides the user towards a saveable entry: a field they leave behind empty
-/// says so immediately, rather than waiting for the save to be rejected.
-///
-/// The view model still enforces the same rule, since an entry could also
-/// arrive from an import or the translation service later on. This is the
-/// affordance, not the enforcement.
-class AddVocabSheet extends StatefulWidget {
-  const AddVocabSheet({required this.onSubmit, super.key});
+/// says so immediately, rather than waiting for the save to be rejected. The
+/// view model still enforces the same rule, since an entry could also arrive
+/// from an import or a translation service later on. This is the affordance,
+/// not the enforcement.
+class VocabSheet extends StatefulWidget {
+  const VocabSheet({required this.onSubmit, this.initial, super.key});
+
+  /// The entry being edited, or null when adding a new one. Only its text is
+  /// read — the caller owns what happens to the rest of it.
+  final Vocab? initial;
 
   final void Function(String term, String translation) onSubmit;
 
   @override
-  State<AddVocabSheet> createState() => _AddVocabSheetState();
+  State<VocabSheet> createState() => _VocabSheetState();
 }
 
-class _AddVocabSheetState extends State<AddVocabSheet> {
-  final _termController = TextEditingController();
-  final _translationController = TextEditingController();
+class _VocabSheetState extends State<VocabSheet> {
+  late final TextEditingController _termController;
+  late final TextEditingController _translationController;
   final _termFocus = FocusNode();
   final _translationFocus = FocusNode();
 
@@ -33,6 +41,11 @@ class _AddVocabSheetState extends State<AddVocabSheet> {
   @override
   void initState() {
     super.initState();
+    final initial = widget.initial;
+    _termController = TextEditingController(text: initial?.term ?? '');
+    _translationController = TextEditingController(
+      text: initial?.translation ?? '',
+    );
     _termController.addListener(_onChanged);
     _translationController.addListener(_onChanged);
     _termFocus.addListener(
@@ -77,7 +90,7 @@ class _AddVocabSheetState extends State<AddVocabSheet> {
   @override
   Widget build(BuildContext context) {
     return FormSheet(
-      title: 'New vocabulary',
+      title: widget.initial == null ? 'New vocabulary' : 'Edit vocabulary',
       submitLabel: 'Save',
       onSubmit: _canSave ? _submit : null,
       fields: [
