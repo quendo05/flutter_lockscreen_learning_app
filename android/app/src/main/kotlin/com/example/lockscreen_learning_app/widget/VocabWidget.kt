@@ -1,6 +1,9 @@
 package com.example.lockscreen_learning_app.widget
 
 import android.content.Context
+import android.graphics.Typeface
+import android.text.TextPaint
+import android.util.TypedValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -116,6 +119,13 @@ class VocabWidget : GlanceAppWidget() {
     @Composable
     private fun Panel(context: Context, entry: PublishedEntry?) {
         val metrics = metricsFor(LocalSize.current)
+        val term = entry?.term ?: context.getString(R.string.vocab_widget_empty_term)
+        val translation = entry?.translation
+            ?: context.getString(R.string.vocab_widget_empty_translation)
+
+        // What the text actually has to fit into, once the panel takes its
+        // margins out of the bucket.
+        val available = LocalSize.current.width - metrics.horizontalPadding * 2
 
         Column(
             modifier = GlanceModifier
@@ -143,13 +153,21 @@ class VocabWidget : GlanceAppWidget() {
             verticalAlignment = Alignment.Vertical.CenterVertically,
         ) {
             Text(
-                text = entry?.term ?: context.getString(R.string.vocab_widget_empty_term),
+                text = term,
                 maxLines = 1,
                 style = TextStyle(
                     // Bold, where the app's own card uses a regular headline.
                     // That card sits on a colour the app picked; this sits on a
                     // wallpaper the app has never seen.
-                    fontSize = metrics.termSize,
+                    fontSize = fit(
+                        context = context,
+                        text = term,
+                        available = available,
+                        lines = 1,
+                        preferred = metrics.termSize,
+                        floor = metrics.termFloor,
+                        bold = true,
+                    ),
                     fontWeight = FontWeight.Bold,
                     // Muted when nothing is due, so the slot reads as a prompt
                     // rather than as a term called "No term due".
@@ -166,11 +184,21 @@ class VocabWidget : GlanceAppWidget() {
             Spacer(GlanceModifier.height(metrics.gap))
 
             Text(
-                text = entry?.translation
-                    ?: context.getString(R.string.vocab_widget_empty_translation),
+                text = translation,
                 maxLines = metrics.translationLines,
                 style = TextStyle(
-                    fontSize = metrics.translationSize,
+                    // Measured against the whole line budget, not one line, so a
+                    // bucket that allows two lines lets the text wrap into them
+                    // before it starts shrinking.
+                    fontSize = fit(
+                        context = context,
+                        text = translation,
+                        available = available,
+                        lines = metrics.translationLines,
+                        preferred = metrics.translationSize,
+                        floor = metrics.translationFloor,
+                        bold = false,
+                    ),
                     color = ColorProvider(R.color.widget_on_surface_variant),
                 ),
             )
@@ -212,7 +240,9 @@ class VocabWidget : GlanceAppWidget() {
         fun metricsFor(size: DpSize): Metrics = when {
             size.height >= HUGE.height -> Metrics(
                 termSize = 38.sp,
+                termFloor = 22.sp,
                 translationSize = 20.sp,
+                translationFloor = 15.sp,
                 translationLines = 2,
                 horizontalPadding = 26.dp,
                 verticalPadding = 22.dp,
@@ -221,7 +251,9 @@ class VocabWidget : GlanceAppWidget() {
 
             size.height >= LARGE.height -> Metrics(
                 termSize = 30.sp,
+                termFloor = 18.sp,
                 translationSize = 17.sp,
+                translationFloor = 13.sp,
                 // Two lines only here. Below this the second line is what pushes
                 // the block past its bucket.
                 translationLines = 2,
@@ -232,7 +264,9 @@ class VocabWidget : GlanceAppWidget() {
 
             size.height >= MEDIUM.height -> Metrics(
                 termSize = 22.sp,
+                termFloor = 14.sp,
                 translationSize = 14.sp,
+                translationFloor = 11.sp,
                 translationLines = 1,
                 horizontalPadding = 16.dp,
                 verticalPadding = 12.dp,
@@ -241,7 +275,9 @@ class VocabWidget : GlanceAppWidget() {
 
             size.height >= SMALL.height -> Metrics(
                 termSize = 17.sp,
+                termFloor = 12.sp,
                 translationSize = 12.sp,
+                translationFloor = 10.sp,
                 translationLines = 1,
                 horizontalPadding = 12.dp,
                 verticalPadding = 8.dp,
@@ -250,7 +286,9 @@ class VocabWidget : GlanceAppWidget() {
 
             else -> Metrics(
                 termSize = 14.sp,
+                termFloor = 10.sp,
                 translationSize = 11.sp,
+                translationFloor = 9.sp,
                 translationLines = 1,
                 horizontalPadding = 10.dp,
                 verticalPadding = 5.dp,
@@ -260,15 +298,68 @@ class VocabWidget : GlanceAppWidget() {
     }
 }
 
-/** What one size bucket draws with. */
+/**
+ * What one size bucket draws with.
+ *
+ * The two `Floor` values are how far [fit] may shrink a line that would not
+ * otherwise get through: far enough to save most real terms, not so far that
+ * the panel turns into fine print to spare one compound noun.
+ */
 private data class Metrics(
     val termSize: TextUnit,
+    val termFloor: TextUnit,
     val translationSize: TextUnit,
+    val translationFloor: TextUnit,
     val translationLines: Int,
     val horizontalPadding: Dp,
     val verticalPadding: Dp,
     val gap: Dp,
 )
+
+/**
+ * The largest size at or below [preferred] whose [text] fits, down to [floor].
+ *
+ * Glance has no equivalent of a TextView's `autoSizeTextType`: RemoteViews
+ * cannot switch autosizing on, and the layouts Glance builds from are fixed. So
+ * the fit gets measured here instead, against the paint the panel will draw in.
+ *
+ * [available] is the bucket's width, not the widget's, and that is safe in the
+ * direction it needs to be: Glance picks the largest bucket that fits, so the
+ * widget is never narrower than its bucket, and a size that fits the bucket
+ * fits the widget. It errs small, never large.
+ *
+ * A term long enough to reach [floor] still ellipsizes. Past that point
+ * shrinking costs more legibility than the missing tail does.
+ */
+private fun fit(
+    context: Context,
+    text: String,
+    available: Dp,
+    lines: Int,
+    preferred: TextUnit,
+    floor: TextUnit,
+    bold: Boolean,
+): TextUnit {
+    val display = context.resources.displayMetrics
+    // Three percent held back: this paint is the platform's default bold, which
+    // is close to what Glance draws but not guaranteed to be the same face on
+    // every device.
+    val budget =
+        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, available.value, display) *
+            lines * 0.97f
+    val paint = TextPaint().apply {
+        typeface = if (bold) Typeface.DEFAULT_BOLD else Typeface.DEFAULT
+    }
+
+    var size = preferred.value
+    while (size > floor.value) {
+        paint.textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, size, display)
+        if (paint.measureText(text) <= budget) return size.sp
+        size -= 1f
+    }
+
+    return floor
+}
 
 private fun describe(context: Context, entry: PublishedEntry?): String = entry?.let {
     context.getString(R.string.vocab_widget_description_format, it.term, it.translation)
