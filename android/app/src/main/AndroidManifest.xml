@@ -30,7 +30,7 @@
              too unless it opts out. Exported because the broadcast that drives
              it comes from the system. -->
         <receiver
-            android:name=".widget.VocabWidgetProvider"
+            android:name=".widget.VocabWidgetReceiver"
             android:label="@string/vocab_widget_label"
             android:exported="true">
             <intent-filter>

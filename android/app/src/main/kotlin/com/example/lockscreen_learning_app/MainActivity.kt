@@ -1,6 +1,6 @@
 package com.example.lockscreen_learning_app
 
-import com.example.lockscreen_learning_app.widget.VocabWidgetProvider
+import com.example.lockscreen_learning_app.widget.VocabWidgetReceiver
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -16,7 +16,7 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "refresh" -> {
-                        VocabWidgetProvider.refresh(this)
+                        VocabWidgetReceiver.refresh(this)
                         result.success(null)
                     }
                     else -> result.notImplemented()

@@ -4,10 +4,14 @@
      you want them, they go in a copy of this file under `res/xml-31/` rather
      than here, or lint flags them on older devices. The lock screen opt-out
      (`android:widgetCategory="not_keyguard"`) works the same way, in
-     `res/xml-36/` — not wanted here, since the lock screen is the point. -->
+     `res/xml-36/` — not wanted here, since the lock screen is the point.
+
+     `initialLayout` is still required even though Glance builds the real
+     RemoteViews itself, so it points at the placeholder Glance ships for
+     exactly this: it is on screen only until the first composition lands. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/vocab_widget_description"
-    android:initialLayout="@layout/vocab_widget"
+    android:initialLayout="@layout/glance_default_loading_layout"
     android:minWidth="180dp"
     android:minHeight="40dp"
     android:resizeMode="horizontal|vertical"
