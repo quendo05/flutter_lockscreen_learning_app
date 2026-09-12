@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Deliberately not the app's 12dp card radius. A widget is drawn on the
+         launcher, not on an app surface, and a shape that ignores the system's
+         widget radius reads as pasted on. values-v31/ hands this over to the
+         platform value once there is one. -->
+    <dimen name="widget_corner_radius">24dp</dimen>
+</resources>

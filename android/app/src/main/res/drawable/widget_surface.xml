@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Glass, as far as a widget can have it.
+
+     There is no backdrop blur to be had: the launcher composites the widget and
+     nothing in RemoteViews can sample what sits behind it, so RenderEffect is
+     not an option. What is real is the transparency — the wallpaper genuinely
+     shows through this fill. The gradient supplies the "lit from above" read and
+     the stroke the rim highlight, which together are what makes a translucent
+     panel look like glass rather than like a faded box.
+
+     It falls from plain white to a mint cast rather than staying neutral. A
+     near-white panel reads as a system surface; the tint is what makes it this
+     app's surface, and it is the same hue the app is built from.
+
+     Alpha stays at 84-90% on purpose. The fill sits over an unknown wallpaper,
+     so contrast has to hold at both extremes: here the body text clears 5.3:1
+     against a black wallpaper and more against a white one, which keeps WCAG AA
+     whatever the user has set. More transparency photographs better and fails
+     in use. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="@dimen/widget_corner_radius" />
+    <gradient
+        android:angle="270"
+        android:startColor="#E6FFFFFF"
+        android:endColor="#D6D9EFE4"
+        android:type="linear" />
+    <stroke
+        android:width="1dp"
+        android:color="#80FFFFFF" />
+</shape>

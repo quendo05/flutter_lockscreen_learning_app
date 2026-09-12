@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lifted from the app's own ColorScheme rather than picked by eye: these are
+     the values `ColorScheme.fromSeed(seedColor: 0xFF3A6B5C)` produces in
+     lib/main.dart, so the widget and the app are the same green rather than two
+     greens that nearly match. The dark set lives in values-night/. -->
+<resources>
+    <color name="widget_on_surface">#171D1A</color>
+    <color name="widget_on_surface_variant">#3F4945</color>
+
+    <!-- onPrimaryContainer, not primary. Primary (#116B56) drops to 3.7:1 on the
+         translucent fill over a black wallpaper, which fails AA for text this
+         small; this holds 5.3:1 at the same worst case. -->
+    <color name="widget_accent">#005140</color>
+</resources>

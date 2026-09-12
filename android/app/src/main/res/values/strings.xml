@@ -8,4 +8,10 @@
          says what to do rather than what went wrong. -->
     <string name="vocab_widget_empty_term">No term due</string>
     <string name="vocab_widget_empty_translation">Open the app to line some up</string>
+
+    <!-- Read by TalkBack for the panel as a whole. The comma is what makes a
+         screen reader pause between the term and its translation instead of
+         running them into one phrase. -->
+    <string name="vocab_widget_description_format">%1$s, %2$s</string>
+    <string name="vocab_widget_empty_description">No term due. Open the app to line some up.</string>
 </resources>

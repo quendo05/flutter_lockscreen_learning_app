@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Attributes here are the ones every supported release understands.
-     `previewLayout`, `targetCellWidth` and `targetCellHeight` are API 31+; if
-     you want them, they go in a copy of this file under `res/xml-31/` rather
-     than here, or lint flags them on older devices. The lock screen opt-out
-     (`android:widgetCategory="not_keyguard"`) works the same way, in
-     `res/xml-36/` — not wanted here, since the lock screen is the point.
+<!-- Attributes here are the ones every supported release understands. The
+     API 31+ additions live in the xml-v31/ copy of this file rather than here,
+     or lint flags them on older devices. The lock screen opt-out
+     (`android:widgetCategory="not_keyguard"`) would work the same way, in
+     res/xml-v36/ — not wanted, since the lock screen is the point.
+
+     minWidth/minHeight are the floor the user may squash to, not the size the
+     widget wants. They are set low so a single lock screen row is a legal
+     placement; VocabWidget's smallest size bucket is drawn for exactly this.
 
      `initialLayout` is still required even though Glance builds the real
      RemoteViews itself, so it points at the placeholder Glance ships for
@@ -12,8 +15,8 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/vocab_widget_description"
     android:initialLayout="@layout/glance_default_loading_layout"
-    android:minWidth="180dp"
-    android:minHeight="40dp"
+    android:minWidth="110dp"
+    android:minHeight="48dp"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
     android:updatePeriodMillis="1800000" />
