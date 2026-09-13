@@ -11,10 +11,15 @@
 
      `initialLayout` is still required even though Glance builds the real
      RemoteViews itself, so it points at the placeholder Glance ships for
-     exactly this: it is on screen only until the first composition lands. -->
+     exactly this: it is on screen only until the first composition lands.
+
+     `previewImage` is what the picker shows below API 31, where
+     `previewLayout` does not exist. The brand icon is a poor likeness of the
+     widget but a far better one than the loading placeholder. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/vocab_widget_description"
     android:initialLayout="@layout/glance_default_loading_layout"
+    android:previewImage="@mipmap/ic_launcher"
     android:minWidth="110dp"
     android:minHeight="48dp"
     android:resizeMode="horizontal|vertical"

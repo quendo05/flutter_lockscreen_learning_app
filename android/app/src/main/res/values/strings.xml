@@ -5,10 +5,11 @@
          touching the manifest, and so the product has one name in one place. -->
     <string name="app_name">Nagara</string>
 
-    <!-- Kept apart from app_name on purpose. The launcher entry and the widget
-         picker entry are different things: this one may later want to say which
-         widget it is, without renaming the app to match. -->
-    <string name="vocab_widget_label">Nagara</string>
+    <!-- Kept apart from app_name on purpose, and now different from it. The
+         picker lists an entry as "app name / widget label", so repeating the app
+         name there would have spent a line saying "Nagara Nagara". This names
+         the widget instead. -->
+    <string name="vocab_widget_label">Vocabulary</string>
     <string name="vocab_widget_description">The term your lock screen is showing right now.</string>
 
     <!-- Shown when no queue has been published yet, or the last one ran out
@@ -16,6 +17,11 @@
          says what to do rather than what went wrong. -->
     <string name="vocab_widget_empty_term">No term due</string>
     <string name="vocab_widget_empty_translation">Open the app to line some up</string>
+
+    <!-- Shown in the widget picker, never in the widget itself. The pair is
+         the brand sheet's own example, so the picker and the brand agree. -->
+    <string name="vocab_widget_preview_term">die Verabredung</string>
+    <string name="vocab_widget_preview_translation">the appointment</string>
 
     <!-- Read by TalkBack for the panel as a whole. The comma is what makes a
          screen reader pause between the term and its translation instead of

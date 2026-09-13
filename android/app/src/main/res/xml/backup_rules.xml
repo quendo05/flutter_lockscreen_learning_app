@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Google Drive backup, below API 31. The API 31+ equivalent is
+     data_extraction_rules.xml; both say the same thing and both have to exist.
+
+     Everything is backed up except the published queue. That file is derived —
+     the app rebuilds it from the database on the next open — and it carries
+     absolute timestamps, so restoring it onto a new phone would put a schedule
+     from another week on the lock screen until the app is next opened. The
+     vocabulary itself is exactly what a user restoring a phone wants back. -->
+<full-backup-content>
+    <exclude domain="file" path="schedule.json" />
+</full-backup-content>

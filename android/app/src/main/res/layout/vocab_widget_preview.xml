@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What the widget picker shows. Static on purpose: the picker renders this
+     without ever starting the app, so it cannot show real vocabulary.
+
+     Without it the picker draws `initialLayout`, which is Glance's loading
+     placeholder — a bare app icon. For an app whose entire proposition is this
+     widget, that is the worst possible first impression on the one surface
+     where a user decides whether to place it.
+
+     It mirrors VocabWidget's medium size bucket: same surface drawable, same
+     type sizes, same colours. Those are two descriptions of one design, so a
+     change to the composition belongs here too. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center_vertical"
+    android:background="@drawable/widget_surface"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_on_surface"
+        android:text="@string/vocab_widget_preview_term" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="14sp"
+        android:textColor="@color/widget_accent"
+        android:text="@string/vocab_widget_preview_translation" />
+</LinearLayout>

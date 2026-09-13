@@ -5,12 +5,16 @@
      is placed at its minimum, and the minimum here is deliberately tiny so it
      can be squashed — which would otherwise mean every placement started as the
      smallest thing it is allowed to be. Four by two is the size the medium
-     bucket is drawn for. -->
+     bucket is drawn for.
+
+     previewLayout is the other half: it replaces the loading placeholder in
+     the widget picker with something that looks like the widget. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:description="@string/vocab_widget_description"
     android:initialLayout="@layout/glance_default_loading_layout"
     android:minWidth="110dp"
     android:minHeight="48dp"
+    android:previewLayout="@layout/vocab_widget_preview"
     android:targetCellWidth="4"
     android:targetCellHeight="2"
     android:resizeMode="horizontal|vertical"
