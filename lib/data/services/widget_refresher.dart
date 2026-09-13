@@ -21,7 +21,7 @@ class PlatformWidgetRefresher implements WidgetRefresher {
 
   /// Shared with `MainActivity.kt`; the two have no compiler between them, so
   /// renaming here means renaming there.
-  static const channel = MethodChannel('lockscreen_learning_app/widget');
+  static const channel = MethodChannel('nagara/widget');
 
   @override
   Future<void> refresh() async {

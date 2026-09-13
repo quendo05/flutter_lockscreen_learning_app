@@ -1,6 +1,6 @@
-package com.github.quendo05.lockscreenvocab
+package com.github.quendo05.nagara
 
-import com.github.quendo05.lockscreenvocab.widget.VocabWidgetReceiver
+import com.github.quendo05.nagara.widget.VocabWidgetReceiver
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -26,6 +26,6 @@ class MainActivity : FlutterActivity() {
 
     private companion object {
         /** Shared with `PlatformWidgetRefresher` in `widget_refresher.dart`. */
-        const val WIDGET_CHANNEL = "lockscreen_learning_app/widget"
+        const val WIDGET_CHANNEL = "nagara/widget"
     }
 }

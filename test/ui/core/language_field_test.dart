@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/ui/core/widgets/language_field.dart';
+import 'package:nagara/ui/core/widgets/language_field.dart';
 
 void main() {
   final picked = <String>[];

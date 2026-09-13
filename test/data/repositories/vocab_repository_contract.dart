@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
+import 'package:nagara/data/repositories/vocab_repository.dart';
+import 'package:nagara/domain/models/vocab.dart';
 
 /// The deck [contractVocab] files terms under unless told otherwise.
 const contractDeckId = 'd1';

@@ -13,7 +13,7 @@ plugins {
 }
 
 android {
-    namespace = "com.github.quendo05.lockscreenvocab"
+    namespace = "com.github.quendo05.nagara"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -32,7 +32,7 @@ android {
         // Fixed for the life of the app: Play binds the listing to this string,
         // so it cannot change after the first upload. `com.example` would have
         // been rejected at upload time anyway.
-        applicationId = "com.github.quendo05.lockscreenvocab"
+        applicationId = "com.github.quendo05.nagara"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

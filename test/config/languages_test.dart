@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/config/defaults.dart';
-import 'package:lockscreen_learning_app/config/languages.dart';
+import 'package:nagara/config/defaults.dart';
+import 'package:nagara/config/languages.dart';
 
 void main() {
   group('supportedLanguages', () {

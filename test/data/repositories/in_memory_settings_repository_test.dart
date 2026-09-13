@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
+import 'package:nagara/data/repositories/in_memory_settings_repository.dart';
 
 import 'settings_repository_contract.dart';
 

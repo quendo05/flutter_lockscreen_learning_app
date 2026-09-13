@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
+import 'package:nagara/domain/models/vocab.dart';
 
 void main() {
   // A fixed clock value keeps every assertion deterministic.

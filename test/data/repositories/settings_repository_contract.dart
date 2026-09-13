@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/data/repositories/settings_repository.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
+import 'package:nagara/data/repositories/settings_repository.dart';
+import 'package:nagara/domain/models/deck.dart';
 
 /// The behaviour every [SettingsRepository] implementation must satisfy.
 void runSettingsRepositoryContract(

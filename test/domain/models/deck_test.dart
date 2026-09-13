@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
+import 'package:nagara/domain/models/deck.dart';
 
 void main() {
   final createdAt = DateTime.utc(2026, 3, 2, 14);

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
-import 'package:lockscreen_learning_app/domain/models/published_schedule.dart';
-import 'package:lockscreen_learning_app/domain/models/scheduled_vocab.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
+import 'package:nagara/domain/models/deck.dart';
+import 'package:nagara/domain/models/published_schedule.dart';
+import 'package:nagara/domain/models/scheduled_vocab.dart';
+import 'package:nagara/domain/models/vocab.dart';
 
 void main() {
   final nine = DateTime.utc(2026, 1, 1, 9);

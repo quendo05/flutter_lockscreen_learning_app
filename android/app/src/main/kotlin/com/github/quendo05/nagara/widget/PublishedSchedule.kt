@@ -1,4 +1,4 @@
-package com.github.quendo05.lockscreenvocab.widget
+package com.github.quendo05.nagara.widget
 
 import org.json.JSONObject
 

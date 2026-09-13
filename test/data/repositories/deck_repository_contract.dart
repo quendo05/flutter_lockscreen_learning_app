@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/data/repositories/deck_repository.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
+import 'package:nagara/data/repositories/deck_repository.dart';
+import 'package:nagara/domain/models/deck.dart';
 
 Deck contractDeck(String id, {String? name, DateTime? createdAt}) => Deck(
   id: id,

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
-import 'package:lockscreen_learning_app/ui/core/widgets/language_field.dart';
-import 'package:lockscreen_learning_app/ui/deck_settings/view_models/deck_settings_view_model.dart';
-import 'package:lockscreen_learning_app/ui/deck_settings/widgets/deck_settings_screen.dart';
+import 'package:nagara/data/repositories/in_memory_deck_repository.dart';
+import 'package:nagara/data/repositories/in_memory_settings_repository.dart';
+import 'package:nagara/data/repositories/in_memory_vocab_repository.dart';
+import 'package:nagara/domain/models/deck.dart';
+import 'package:nagara/domain/models/vocab.dart';
+import 'package:nagara/ui/core/widgets/language_field.dart';
+import 'package:nagara/ui/deck_settings/view_models/deck_settings_view_model.dart';
+import 'package:nagara/ui/deck_settings/widgets/deck_settings_screen.dart';
 
 void main() {
   final deck = Deck(

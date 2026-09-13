@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
-import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
-import 'package:lockscreen_learning_app/ui/vocab_list/view_models/vocab_list_view_model.dart';
-import 'package:lockscreen_learning_app/ui/vocab_list/widgets/vocab_list_screen.dart';
+import 'package:nagara/data/repositories/in_memory_vocab_repository.dart';
+import 'package:nagara/data/repositories/vocab_repository.dart';
+import 'package:nagara/domain/models/deck.dart';
+import 'package:nagara/domain/models/vocab.dart';
+import 'package:nagara/ui/vocab_list/view_models/vocab_list_view_model.dart';
+import 'package:nagara/ui/vocab_list/widgets/vocab_list_screen.dart';
 
 import '../../support/vocab_repository_doubles.dart';
 

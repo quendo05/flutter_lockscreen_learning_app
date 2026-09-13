@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/ui/vocab_list/widgets/vocab_sheet.dart';
+import 'package:nagara/ui/vocab_list/widgets/vocab_sheet.dart';
 
 void main() {
   final submissions = <(String, String)>[];

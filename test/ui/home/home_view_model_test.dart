@@ -1,15 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/config/defaults.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
-import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
-import 'package:lockscreen_learning_app/data/services/schedule_store.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
-import 'package:lockscreen_learning_app/domain/models/published_schedule.dart';
-import 'package:lockscreen_learning_app/domain/models/scheduled_vocab.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
-import 'package:lockscreen_learning_app/ui/home/view_models/home_view_model.dart';
+import 'package:nagara/config/defaults.dart';
+import 'package:nagara/data/repositories/in_memory_deck_repository.dart';
+import 'package:nagara/data/repositories/in_memory_settings_repository.dart';
+import 'package:nagara/data/repositories/in_memory_vocab_repository.dart';
+import 'package:nagara/data/repositories/vocab_repository.dart';
+import 'package:nagara/data/services/schedule_store.dart';
+import 'package:nagara/domain/models/deck.dart';
+import 'package:nagara/domain/models/published_schedule.dart';
+import 'package:nagara/domain/models/scheduled_vocab.dart';
+import 'package:nagara/domain/models/vocab.dart';
+import 'package:nagara/ui/home/view_models/home_view_model.dart';
 
 import '../../support/schedule_store_doubles.dart';
 import '../../support/vocab_repository_doubles.dart';

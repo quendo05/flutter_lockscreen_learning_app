@@ -1,4 +1,4 @@
-package com.github.quendo05.lockscreenvocab.widget
+package com.github.quendo05.nagara.widget
 
 import android.content.Context
 import android.graphics.Typeface
@@ -40,8 +40,8 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.github.quendo05.lockscreenvocab.MainActivity
-import com.github.quendo05.lockscreenvocab.R
+import com.github.quendo05.nagara.MainActivity
+import com.github.quendo05.nagara.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

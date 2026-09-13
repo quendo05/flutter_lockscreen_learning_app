@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:lockscreen_learning_app/data/repositories/vocab_repository.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
+import 'package:nagara/data/repositories/vocab_repository.dart';
+import 'package:nagara/domain/models/vocab.dart';
 
 /// A repository whose every call fails, for exercising error paths.
 ///

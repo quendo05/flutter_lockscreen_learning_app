@@ -1,5 +1,5 @@
-import 'package:lockscreen_learning_app/data/services/schedule_store.dart';
-import 'package:lockscreen_learning_app/domain/models/published_schedule.dart';
+import 'package:nagara/data/services/schedule_store.dart';
+import 'package:nagara/domain/models/published_schedule.dart';
 
 /// A store that keeps what it was handed, for asserting on what was published.
 class RecordingScheduleStore implements ScheduleStore {

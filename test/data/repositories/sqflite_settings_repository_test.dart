@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/data/repositories/sqflite_settings_repository.dart';
-import 'package:lockscreen_learning_app/data/services/app_database.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
+import 'package:nagara/data/repositories/sqflite_settings_repository.dart';
+import 'package:nagara/data/services/app_database.dart';
+import 'package:nagara/domain/models/deck.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 

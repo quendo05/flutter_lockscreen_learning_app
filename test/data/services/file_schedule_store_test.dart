@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/data/services/file_schedule_store.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
-import 'package:lockscreen_learning_app/domain/models/published_schedule.dart';
-import 'package:lockscreen_learning_app/domain/models/scheduled_vocab.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
+import 'package:nagara/data/services/file_schedule_store.dart';
+import 'package:nagara/domain/models/deck.dart';
+import 'package:nagara/domain/models/published_schedule.dart';
+import 'package:nagara/domain/models/scheduled_vocab.dart';
+import 'package:nagara/domain/models/vocab.dart';
 import 'package:path/path.dart' as p;
 
 void main() {

@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
-import 'package:lockscreen_learning_app/domain/models/published_schedule.dart';
-import 'package:lockscreen_learning_app/domain/models/scheduled_vocab.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
-import 'package:lockscreen_learning_app/domain/use_cases/record_shown_terms_use_case.dart';
+import 'package:nagara/domain/models/deck.dart';
+import 'package:nagara/domain/models/published_schedule.dart';
+import 'package:nagara/domain/models/scheduled_vocab.dart';
+import 'package:nagara/domain/models/vocab.dart';
+import 'package:nagara/domain/use_cases/record_shown_terms_use_case.dart';
 
 void main() {
   const recordShown = RecordShownTermsUseCase();

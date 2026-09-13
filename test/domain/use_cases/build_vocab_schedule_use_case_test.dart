@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
-import 'package:lockscreen_learning_app/domain/use_cases/build_vocab_schedule_use_case.dart';
+import 'package:nagara/domain/models/vocab.dart';
+import 'package:nagara/domain/use_cases/build_vocab_schedule_use_case.dart';
 
 void main() {
   final from = DateTime.utc(2026, 5, 1, 8, 0);

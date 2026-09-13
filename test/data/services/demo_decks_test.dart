@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
-import 'package:lockscreen_learning_app/data/services/demo_decks.dart';
+import 'package:nagara/data/repositories/in_memory_deck_repository.dart';
+import 'package:nagara/data/repositories/in_memory_vocab_repository.dart';
+import 'package:nagara/data/services/demo_decks.dart';
 
 void main() {
   late InMemoryDeckRepository decks;

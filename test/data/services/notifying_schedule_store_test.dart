@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/data/services/notifying_schedule_store.dart';
-import 'package:lockscreen_learning_app/data/services/widget_refresher.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
-import 'package:lockscreen_learning_app/domain/models/published_schedule.dart';
+import 'package:nagara/data/services/notifying_schedule_store.dart';
+import 'package:nagara/data/services/widget_refresher.dart';
+import 'package:nagara/domain/models/deck.dart';
+import 'package:nagara/domain/models/published_schedule.dart';
 
 import '../../support/schedule_store_doubles.dart';
 

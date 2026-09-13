@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lockscreen_learning_app/config/defaults.dart';
-import 'package:lockscreen_learning_app/config/languages.dart';
-import 'package:lockscreen_learning_app/data/repositories/deck_repository.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_deck_repository.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_settings_repository.dart';
-import 'package:lockscreen_learning_app/data/repositories/in_memory_vocab_repository.dart';
-import 'package:lockscreen_learning_app/domain/models/deck.dart';
-import 'package:lockscreen_learning_app/domain/models/vocab.dart';
-import 'package:lockscreen_learning_app/ui/deck_list/view_models/deck_list_view_model.dart';
-import 'package:lockscreen_learning_app/ui/deck_list/widgets/deck_list_screen.dart';
+import 'package:nagara/config/defaults.dart';
+import 'package:nagara/config/languages.dart';
+import 'package:nagara/data/repositories/deck_repository.dart';
+import 'package:nagara/data/repositories/in_memory_deck_repository.dart';
+import 'package:nagara/data/repositories/in_memory_settings_repository.dart';
+import 'package:nagara/data/repositories/in_memory_vocab_repository.dart';
+import 'package:nagara/domain/models/deck.dart';
+import 'package:nagara/domain/models/vocab.dart';
+import 'package:nagara/ui/deck_list/view_models/deck_list_view_model.dart';
+import 'package:nagara/ui/deck_list/widgets/deck_list_screen.dart';
 
 class _FailingDeckRepository implements DeckRepository {
   @override
