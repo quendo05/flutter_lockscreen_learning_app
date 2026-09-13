@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- What the launcher shows under the icon. Deliberately a resource rather
+         than a literal in the manifest, so it can be localised later without
+         touching the manifest, and so the product has one name in one place. -->
+    <string name="app_name">LockScreenVocab</string>
+
+    <!-- Kept apart from app_name on purpose. The launcher entry and the widget
+         picker entry are different things: this one may later want to say which
+         widget it is, without renaming the app to match. -->
     <string name="vocab_widget_label">LockScreenVocab</string>
     <string name="vocab_widget_description">The term your lock screen is showing right now.</string>
 
