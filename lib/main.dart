@@ -131,9 +131,10 @@ class LockscreenLearningApp extends StatelessWidget {
   @visibleForTesting
   static ThemeData themeFor(Brightness brightness) {
     final scheme = ColorScheme.fromSeed(
-      // Deliberately not the default indigo — a muted green reads as calm
-      // study material rather than as a generic template app.
-      seedColor: const Color(0xFF3A6B5C),
+      // Plum 500 from the brand sheet in assets/brand/. The whole Material
+      // palette is derived from it rather than hand-picked, so a screen added
+      // later inherits the brand instead of guessing at it.
+      seedColor: const Color(0xFF5C3391),
       brightness: brightness,
     );
     final base = ThemeData(colorScheme: scheme);

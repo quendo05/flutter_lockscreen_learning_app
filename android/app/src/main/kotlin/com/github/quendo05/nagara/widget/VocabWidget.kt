@@ -199,7 +199,16 @@ class VocabWidget : GlanceAppWidget() {
                         floor = metrics.translationFloor,
                         bold = false,
                     ),
-                    color = ColorProvider(R.color.widget_on_surface_variant),
+                    // Saffron, as the brand sheet draws it. Only for a real
+                    // translation: the empty state is a prompt rather than
+                    // content, and the accent would be advertising nothing.
+                    color = ColorProvider(
+                        if (entry == null) {
+                            R.color.widget_on_surface_variant
+                        } else {
+                            R.color.widget_accent
+                        },
+                    ),
                 ),
             )
         }

@@ -50,6 +50,7 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   sqflite_common_ffi: ^2.4.3
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -92,3 +93,22 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Generates the launcher icons from assets/icon/, which are exported from the
+# brand SVGs in assets/brand/. Build-time inputs only: they are deliberately
+# absent from `flutter: assets:` and never ship inside the APK.
+#
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
+  # An image rather than a colour, so the plum gradient survives into the
+  # adaptive icon instead of being flattened to one tone.
+  adaptive_icon_background: "assets/icon/background.png"
+  adaptive_icon_foreground: "assets/icon/foreground.png"
+  # Without this, Android 13 themed icons leave this one in full colour while
+  # every other icon on the home screen tints itself.
+  adaptive_icon_monochrome: "assets/icon/monochrome.png"
+  # The App Store rejects an icon with an alpha channel.
+  remove_alpha_ios: true
