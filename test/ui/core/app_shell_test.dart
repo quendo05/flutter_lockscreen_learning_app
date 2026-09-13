@@ -75,7 +75,7 @@ void main() {
     await pumpShell(tester);
     await tester.pumpAndSettle();
 
-    expect(find.text('LockScreenVocab'), findsOneWidget);
+    expect(find.text('Nagara'), findsOneWidget);
   });
 
   testWidgets('offers both destinations in the navigation bar', (tester) async {
@@ -109,7 +109,7 @@ void main() {
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
 
-    expect(find.text('LockScreenVocab'), findsOneWidget);
+    expect(find.text('Nagara'), findsOneWidget);
   });
 
   testWidgets('sends the empty-state action through to the deck list', (

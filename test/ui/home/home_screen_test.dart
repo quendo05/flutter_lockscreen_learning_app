@@ -59,7 +59,7 @@ void main() {
     await pumpHome(tester, InMemoryVocabRepository());
     await tester.pumpAndSettle();
 
-    expect(find.text('LockScreenVocab'), findsOneWidget);
+    expect(find.text('Nagara'), findsOneWidget);
   });
 
   group('with nothing saved', () {

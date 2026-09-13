@@ -1,6 +1,7 @@
-<h1 align="center">LockScreenVocab</h1>
+<h1 align="center">Nagara</h1>
 
 <p align="center">
+  <b>ながら</b> — Japanese for <i>“while doing something else”</i>.<br />
   Learn a language in the seconds you already spend unlocking your phone.
 </p>
 
@@ -23,7 +24,9 @@
 
 ## Overview
 
-LockScreenVocab turns the most-visited screen on your phone into a flashcard.
+Nagara turns the most-visited screen on your phone into a flashcard. The name is
+the Japanese grammatical form for doing one thing while doing another —
+ながら学習 is the word for exactly the kind of incidental learning this app is.
 Vocabulary you save is grouped into decks and rotates on your lock screen
 through the day — one term every few hours, seen dozens of times without ever
 opening an app.

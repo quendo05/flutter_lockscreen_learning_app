@@ -18,7 +18,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('LockScreenVocab'), findsOneWidget);
+    expect(find.text('Nagara'), findsOneWidget);
     expect(find.text('Nothing on your lock screen yet'), findsOneWidget);
   });
 }
