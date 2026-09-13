@@ -1,4 +1,4 @@
-package com.example.lockscreen_learning_app.widget
+package com.github.quendo05.lockscreenvocab.widget
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName

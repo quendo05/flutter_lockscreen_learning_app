@@ -13,7 +13,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.lockscreen_learning_app"
+    namespace = "com.github.quendo05.lockscreenvocab"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -29,8 +29,10 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.lockscreen_learning_app"
+        // Fixed for the life of the app: Play binds the listing to this string,
+        // so it cannot change after the first upload. `com.example` would have
+        // been rejected at upload time anyway.
+        applicationId = "com.github.quendo05.lockscreenvocab"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
